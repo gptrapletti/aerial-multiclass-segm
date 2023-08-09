@@ -1,0 +1,6 @@
+data/
+
+*.md
+*.ipynb
+
+ ### ! TODO: Remove README.md from there at the end
