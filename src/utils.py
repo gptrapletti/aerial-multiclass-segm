@@ -1,6 +1,5 @@
 import numpy as np
 
-
 def from_png_to_semantic_mask (mask: np.ndarray):
     '''Gets a 3 channels RGB mask array and turns it into a single
     channel semantic segmentation mask with category IDs as
@@ -40,7 +39,7 @@ def from_png_to_semantic_mask (mask: np.ndarray):
             color_is_present = np.all(mask == color, axis=2)
             mask[color_is_present] = category_ids[category]
             
-    return mask[0] # the 3 color channels are now the same, so one is enough
+    return mask[..., 0] # the 3 color channels are now the same, so one is enough
 
 
 if __name__ == '__main__':
@@ -48,18 +47,18 @@ if __name__ == '__main__':
     import os
     import cv2
     from tqdm import tqdm
-
-    mask_filepaths = sorted([os.path.join('data/masks', filename) for filename in os.listdir(os.path.join('data/masks'))])
+    from multiprocessing import Pool, cpu_count
     
-    semantic_masks = []
-    for filepath in tqdm(mask_filepaths):
+    mask_filepaths = sorted([os.path.join('data/masks', filename) for filename in os.listdir(os.path.join('data/masks'))]) ### ! remove the [:10]
+    
+    def process_file(filepath):
         mask = cv2.imread(filepath)
         mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
         semantic_mask = from_png_to_semantic_mask(mask)
-        semantic_masks.append(semantic_mask)
-        
-    breakpoint()
-        
+        return semantic_mask
+
+    with Pool(processes=cpu_count()) as pool:  # use all available CPU cores
+        semantic_masks = list(tqdm(pool.imap(process_file, mask_filepaths), total=len(mask_filepaths))) 
    
 
     
