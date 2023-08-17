@@ -1,0 +1,8 @@
+images_dir: data/images
+masks_dir: data/masks_4000_6000 ### !
+patches_dir: data/patches
+
+n_random_patches_per_image: 50
+
+patch_size: 256
+patch_overlap: 0.5

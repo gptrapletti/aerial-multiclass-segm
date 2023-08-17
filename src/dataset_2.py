@@ -1,3 +1,5 @@
+# Using lazu loading with PIL and 1-channel 4000x6000 masks.
+
 import os
 import torch
 from collections import OrderedDict
@@ -6,7 +8,7 @@ import cv2
 from typing import List
 import numpy as np
 import yaml
-import PIL
+from PIL import Image
 
 class TrainingDataset(torch.utils.data.Dataset):
     def __init__(
@@ -36,33 +38,33 @@ class TrainingDataset(torch.utils.data.Dataset):
         for i in range(len(self.image_filepaths)):
             for j in range(self.n_random_patches_per_image):
                 filename = os.path.basename(self.image_filepaths[i])
-                bbox = self.get_random_bbox_coords(side=256, max_height=2000, max_width=3000)
+                bbox = self.get_random_bbox_coords(side=512, max_height=4000, max_width=6000)
                 patch_bboxs.append((filename, bbox))
         
         return patch_bboxs
 
-    def load_and_process(self, filename):
-        '''Loads and returns full image and mask, does some processing.
-        If image and mask are not cached, it caches them.
-        '''
-        if filename in self.cache:
-            # Return cached image and mask if they are in the cache
-            image = self.cache[filename]['image']
-            mask = self.cache[filename]['mask']
-            # # Move the accessed entry to the end (to show it's recently used) ### ! probably useless if cache len max set to 1
-            # self.cache.move_to_end(filename)
-        else:
-            # Load image
-            image = cv2.imread(os.path.join(self.images_dir, filename))
-            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            image = cv2.resize(image, (3000, 2000))
-            # Load mask
-            mask = np.load(os.path.join(self.masks_dir, os.path.splitext(filename)[0] + '.npy'), allow_pickle=True)          
-            # Add loaded image and mask to the cache
-            self.cache[filename] = {'image': image, 'mask': mask}            
-            # If cache exceeds size limit, remove the least recently used item (first item)
-            if len(self.cache) > 2:
-                self.cache.popitem(last=False)
+    # def load_and_process(self, filename):
+    #     '''Loads and returns full image and mask, does some processing.
+    #     If image and mask are not cached, it caches them.
+    #     '''
+    #     if filename in self.cache:
+    #         # Return cached image and mask if they are in the cache
+    #         image = self.cache[filename]['image']
+    #         mask = self.cache[filename]['mask']
+    #         # # Move the accessed entry to the end (to show it's recently used) ### ! probably useless if cache len max set to 1
+    #         # self.cache.move_to_end(filename)
+    #     else:
+    #         # Load image
+    #         image = cv2.imread(os.path.join(self.images_dir, filename))
+    #         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+    #         image = cv2.resize(image, (3000, 2000))
+    #         # Load mask
+    #         mask = np.load(os.path.join(self.masks_dir, os.path.splitext(filename)[0] + '.npy'), allow_pickle=True)          
+    #         # Add loaded image and mask to the cache
+    #         self.cache[filename] = {'image': image, 'mask': mask}            
+    #         # If cache exceeds size limit, remove the least recently used item (first item)
+    #         if len(self.cache) > 2:
+    #             self.cache.popitem(last=False)
         
         return image, mask
 
@@ -71,13 +73,18 @@ class TrainingDataset(torch.utils.data.Dataset):
         '''
         filename = self.patch_bboxs[idx][0]
         bbox = self.patch_bboxs[idx][1]
-        image, mask = self.load_and_process(filename)
-        image_patch = image[bbox[0][0]:bbox[1][0], bbox[0][1]:bbox[1][1], :]
-        mask_patch = mask[bbox[0][0]:bbox[1][0], bbox[0][1]:bbox[1][1]]
-        
-        
-        
-        image_patch = torch.from_numpy(image_patch).permute(2, 0, 1).type(torch.float16)
+        # Get image patch
+        with Image.open(os.path.join(self.images_dir, filename)) as image:
+            image_patch = image.crop((bbox[0][1], bbox[0][0], bbox[1][1], bbox[1][0])) # PIL works in (width, height)
+            image_patch = image_patch.resize(size=(256, 256))
+            image_patch = np.array(image_patch)
+        # Get mask patch
+        with Image.open(os.path.join(self.masks_dir, filename)) as mask:
+            mask_patch = mask.crop((bbox[0][1], bbox[0][0], bbox[1][1], bbox[1][0]))
+            mask_patch = mask_patch.resize(size=(256, 256))
+            mask_patch = np.array(mask_patch)
+                
+        image_patch = torch.from_numpy(image_patch).permute(2, 0, 1).type(torch.int8)
         mask_patch = torch.from_numpy(mask_patch).type(torch.int8)
         
         return image_patch, mask_patch
@@ -108,7 +115,7 @@ if __name__ == '__main__':
     # for item in tqdm(dataset):
     #     continue
 
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=8, num_workers=14, shuffle=True)
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=2, num_workers=14, shuffle=True)
     
     for batch in tqdm(dataloader):
         continue

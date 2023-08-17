@@ -1,5 +1,9 @@
-data/images/*
-data/masks_original/*
-data/masks/*
+# data/images/*
+# data/masks_original/*
+# data/masks/*
+# data/masks_4000_6000
+# data/patches/*
+
+data/
 plots/
 __pycache__/

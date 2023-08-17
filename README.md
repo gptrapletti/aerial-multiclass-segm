@@ -3,8 +3,7 @@
 - Repo for similar dataset: https://github.com/aqbewtra/Multi-Class-Aerial-Segmentation/tree/main
 
 ## General
-- Masks when loaded should be changed to match the new categories, that is, turn the 3 channels mask into a single channel mask with progressive category IDs or into a one-hot-encoded tensor.
-    - Another option would be to do this as pre-processing and save those arrays to disk (did this! And resized to (2000, 3000)).
+- Masks when loaded should be changed to match the new categories, that is, turn the 3 channels mask into a single channel mask with progressive category IDs or into a one-hot-encoded tensor. Masks were categories were remapped from color IDs to label IDs, the mask resized to 2000x3000 and saved to disk as PNGs (much less space then if saved as single NPY files).
 - Crop 512x512 patches, then resize to 256x256 before training.
     - Ideally all at runtime (https://towardsdatascience.com/slicing-images-into-overlapping-patches-at-runtime-911fa38618d7)
 - Extract patches in a random fashion for training, while in a grid fashion for validation and testing. Extract patches with overlap (25% or 50%) for val and test, but without addressing the overlap via averaging.
@@ -25,6 +24,17 @@ Conclusion: the two methods have the same speed.
 
 
 # TODO
-- Finish `TrainingDataset` class to make it return the mask patch too 
-    - loads image and mask, caches both image and mask, generate random bbox (use a seed), returns patch by patch.
-- Define `ValidationDataset`, with grid patch extraction. Decide whether to use the same approach or try returning a batch of patches. Try with an imported model to verify that training and validation batches may have different shapes.
+- Finish implementing alternative `TrainingDataset` where patches are extracted randomly without overlap, uses lazy loading with PIL
+- Maybe turn also images on disk to 2000x3000 to save space.
+- Remember to define transforms in the dataset!
+- Define `ValidationDataset` (make this val dataset and the training dataset subclasses of a general dataset class?), with grid patch extraction. Decide whether to use the same approach or try returning a batch of patches. Try with an imported model to verify that training and validation batches may have different shapes.
+
+- Add a sampler?
+
+
+
+
+- Dataset con PIL (n=400), estrazione patch 512x512, batch=8, n_workers=12 --> ~ 11 min (69s for 10%)
+    - con batch=32 --> (82s per 10%).
+    - con batch=2 si guadagnagno ~10s.
+- Dataset con PIL (n=400), con estrazione patch 512x512, poi resized a 256x256, batch=8, n_workers=12 --> ~ 14 min (83s for 10%)
