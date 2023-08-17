@@ -1,6 +1,7 @@
 import numpy as np
 from typing import List, Tuple
 import random
+from shapely import Polygon
 
 def from_png_to_semantic_mask (mask: np.ndarray):
     '''Gets a 3 channels RGB mask array and turns it into a single
@@ -9,7 +10,7 @@ def from_png_to_semantic_mask (mask: np.ndarray):
     '''    
 
     category_colors = {
-        'background': [(112, 150, 146),
+        'other': [(112, 150, 146),
         (2, 135, 115),
         (9, 143, 150),
         (0, 0, 0),
@@ -28,7 +29,7 @@ def from_png_to_semantic_mask (mask: np.ndarray):
 
 
     category_ids = {
-        'background': 0,
+        'other': 0,
         'ground': 1,
         'vegetation': 2,
         'buildings': 3,
@@ -44,10 +45,20 @@ def from_png_to_semantic_mask (mask: np.ndarray):
     return mask[..., 0] # the 3 color channels are now the same, so one is enough
 
 
-def get_random_bbox_coords(side, max_height, max_width):
+def get_random_bbox(side, max_height, max_width):
+    '''Gets size of the bounding box and source image properties and returns
+    the coordinates of the bounding box of a patch.
+    '''
     top_left = random.randint(0, max_height - side), random.randint(0, max_width - side)
     bottom_right = top_left[0] + side, top_left[1] + side
     return (top_left, bottom_right)
+
+
+def shapely_friendly_bbox(bbox):
+    '''Convertes a bounding box from format ((A, B), (C, D)) to format
+    required by Shapely to create a polygon out of it. 
+    '''
+    return (bbox[0], (bbox[0][0], bbox[1][1]), bbox[1], (bbox[1][0], bbox[0][1]))
 
 
 def get_grid_bboxs(side: int, overlap: float, max_height: int, max_width: int) -> List[Tuple[Tuple[int, int], Tuple[int, int]]]:
@@ -103,6 +114,36 @@ def get_grid_bboxs(side: int, overlap: float, max_height: int, max_width: int) -
     return bboxs
 
 
+def generate_random_non_overlapping_bboxs(n_bboxs, side, max_height, max_width):
+    '''Generates random bounding boxes with no overlap.
+    
+    Args:
+        n_bboxs: number of bounding boxes to generate.
+        side: bounding box dimension.
+        max_height: maximum height of the image.
+        max_width: maximum width of the image.
+        
+    Returns:
+        List of bounding boxes.
+    '''
+    bboxs = []
+    while len(bboxs) != n_bboxs:
+        bbox_i = get_random_bbox(side=side, max_height=max_height, max_width=max_width)
+        if len(bboxs) == 0:
+            bboxs.append(bbox_i)
+        else:
+            is_overlapping = False
+            bbox_i_polygon = Polygon(shapely_friendly_bbox(bbox_i))
+            for bbox in bboxs:
+                bbox_polygon = Polygon(shapely_friendly_bbox(bbox))
+                intersection = bbox_i_polygon.intersects(bbox_polygon)
+                if intersection:
+                    is_overlapping = True
+                    break
+            if not is_overlapping:
+                bboxs.append(bbox_i)
+                
+    return bboxs   
 
 
 if __name__ == '__main__':

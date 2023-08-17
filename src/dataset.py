@@ -6,9 +6,12 @@ import cv2
 from typing import List
 import numpy as np
 import yaml
-import PIL
+from PIL import Image
+from utils import generate_random_non_overlapping_bboxs
 
-class TrainingDataset(torch.utils.data.Dataset):
+class TrainingDataset1(torch.utils.data.Dataset):
+    '''Dataset for training, with random overlapping patches, cache,
+    for masks 2000x3000.'''
     def __init__(
         self, 
         image_filepaths: List[str],
@@ -24,7 +27,7 @@ class TrainingDataset(torch.utils.data.Dataset):
         self.images_dir = os.path.dirname(image_filepaths[0])
         self.masks_dir = os.path.dirname(mask_filepaths[0])
 
-    def get_random_bbox_coords(self, side, max_height, max_width):
+    def get_random_bbox(self, side, max_height, max_width):
         top_left = random.randint(0, max_height - side), random.randint(0, max_width - side)
         bottom_right = top_left[0] + side, top_left[1] + side
         return (top_left, bottom_right)
@@ -36,7 +39,7 @@ class TrainingDataset(torch.utils.data.Dataset):
         for i in range(len(self.image_filepaths)):
             for j in range(self.n_random_patches_per_image):
                 filename = os.path.basename(self.image_filepaths[i])
-                bbox = self.get_random_bbox_coords(side=256, max_height=2000, max_width=3000)
+                bbox = self.get_random_bbox(side=256, max_height=2000, max_width=3000)
                 patch_bboxs.append((filename, bbox))
         
         return patch_bboxs
@@ -78,6 +81,67 @@ class TrainingDataset(torch.utils.data.Dataset):
         
         
         image_patch = torch.from_numpy(image_patch).permute(2, 0, 1).type(torch.float16)
+        mask_patch = torch.from_numpy(mask_patch).type(torch.int8)
+        
+        return image_patch, mask_patch
+    
+    def __len__(self):
+        return len(self.patch_bboxs)
+    
+    
+class TrainingDataset2(torch.utils.data.Dataset):
+    '''Dataset class for training, with random non-overlapping patches, lazy
+    loading via PIL.
+    '''
+    def __init__(
+        self, 
+        image_filepaths: List[str],
+        mask_filepaths: List[str],
+        n_random_patches_per_image: int,
+    ):
+        super().__init__()
+        self.image_filepaths = image_filepaths
+        self.mask_filepaths = mask_filepaths
+        self.n_random_patches_per_image = n_random_patches_per_image
+        self.patch_bboxs = self.generate_patch_bboxs()
+        self.cache = OrderedDict()
+        self.images_dir = os.path.dirname(image_filepaths[0])
+        self.masks_dir = os.path.dirname(mask_filepaths[0])
+
+    def get_random_bbox(self, side, max_height, max_width):
+        top_left = random.randint(0, max_height - side), random.randint(0, max_width - side)
+        bottom_right = top_left[0] + side, top_left[1] + side
+        return (top_left, bottom_right)
+    
+    def generate_patch_bboxs(self):
+        '''For each image and its mask, generates patches bounding box coordinates.
+        '''
+        patch_bboxs = []
+        for i in range(len(self.image_filepaths)):
+            for j in range(self.n_random_patches_per_image):
+                filename = os.path.basename(self.image_filepaths[i])
+                bbox = self.get_random_bbox(side=512, max_height=4000, max_width=6000)
+                patch_bboxs.append((filename, bbox))
+        
+        return patch_bboxs
+
+    def __getitem__(self, idx):
+        '''Extract and returns a single image patch and a single mask patch from the cached image
+        '''
+        filename = self.patch_bboxs[idx][0]
+        bbox = self.patch_bboxs[idx][1]
+        # Get image patch
+        with Image.open(os.path.join(self.images_dir, filename)) as image:
+            image_patch = image.crop((bbox[0][1], bbox[0][0], bbox[1][1], bbox[1][0])) # PIL works in (width, height)
+            image_patch = image_patch.resize(size=(256, 256))
+            image_patch = np.array(image_patch)
+        # Get mask patch
+        with Image.open(os.path.join(self.masks_dir, filename)) as mask:
+            mask_patch = mask.crop((bbox[0][1], bbox[0][0], bbox[1][1], bbox[1][0]))
+            mask_patch = mask_patch.resize(size=(256, 256))
+            mask_patch = np.array(mask_patch)
+                
+        image_patch = torch.from_numpy(image_patch).permute(2, 0, 1).type(torch.int8)
         mask_patch = torch.from_numpy(mask_patch).type(torch.int8)
         
         return image_patch, mask_patch

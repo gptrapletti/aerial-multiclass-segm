@@ -1,6 +1,5 @@
 images_dir: data/images
-masks_dir: data/masks_4000_6000 ### !
-patches_dir: data/patches
+masks_dir: data/masks
 
 n_random_patches_per_image: 50
 

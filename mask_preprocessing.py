@@ -34,8 +34,7 @@ with Pool(processes=12) as pool:
 #     semantic_mask = from_png_to_semantic_mask(mask)
 #     semantic_mask = semantic_mask.astype(np.uint8)
 #     return semantic_mask
-
-
+#
 # with Pool(processes=cpu_count()) as pool: 
 #     semantic_masks_ls = list(tqdm(pool.imap(process_file, mask_filepaths), total=len(mask_filepaths)))
 #     semantic_masks_arr = np.stack(semantic_masks_ls, axis=0)
