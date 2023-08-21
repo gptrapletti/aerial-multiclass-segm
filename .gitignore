@@ -1,4 +1,6 @@
+data/
 data/images/*
+data/images_original/*
 data/masks_original/*
 data/masks/*
 plots/

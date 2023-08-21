@@ -1,4 +1,4 @@
-# To resize images to 2000x3000 and save them to disk
+# To resize images to 2000x3000 and save to disk
 
 import os
 import cv2
@@ -17,10 +17,7 @@ for i in tqdm(range(len(image_filepaths))):
     image = cv2.resize(image, (3000, 2000))
     dst_filepath = os.path.join(cfg['images_dir'], filename + '.jpg')
     cv2.imwrite(dst_filepath, image)
-    
-    
-
-
+  
 
 # # # # Extract grid patches and save to disk
 # bboxs = get_grid_bboxs(
@@ -29,7 +26,7 @@ for i in tqdm(range(len(image_filepaths))):
 #     max_height = 2000, # because image are going to be resized
 #     max_width = 3000
 # )
-
+#
 # for i in tqdm(range(len(image_filepaths))):
 #     filepath = image_filepaths[i]
 #     filename = os.path.splitext(os.path.basename(filepath))[0] # without extension

@@ -1,7 +1,7 @@
 images_dir: data/images
 masks_dir: data/masks
 
-n_random_patches_per_image: 50
+n_random_patches_per_image: 28
 
 patch_size: 256
 patch_overlap: 0.5

@@ -1,8 +1,9 @@
 ## Sources
 - Dataset website: https://www.tugraz.at/index.php?id=22387
-- Repo for similar dataset: https://github.com/aqbewtra/Multi-Class-Aerial-Segmentation/tree/main
+- Repo for similar dataset: https://github.com/aq   bewtra/Multi-Class-Aerial-Segmentation/tree/main
 
 ## General
+- Drone images, not satellite eheh!
 - Images and masks are resized from  4000x6000 pixels to 2000x3000 pixels and saved to disk. This mitigates computation while still keeping the images large enough to be challenging.
 - Masks are also remapped to single channel masks with progressive category labels as pixel values and saved to disk.
 - Extract 256x256 px patches in a random fashion for training, while in a grid fashion for validation and testing. Extract patches with overlap (25% or 50%) for val and test, but without addressing the overlap via averaging.
@@ -23,9 +24,18 @@ Process the masks from RGB to semantic masks with category ID values:
 Conclusion: the two methods have the same speed.
 
 
-# -------------------- TODO
-- Finish implementing alternative `TrainingDataset` where patches are extracted randomly without overlap, uses lazy loading with PIL (insert the generate random bboxs non-overlapping function.)
-- Remember to define transforms in the dataset!
+## How to deal with the "other" category.
+- Custom Loss Function: Design a custom loss function that effectively ignores the pixels of objects you are not interested in. This can be complex but might allow for more nuanced ontrol of how your model learns from the 'unwanted' objects. For example, the loss for the 'unwanted' objects could be set to zero, so the model is not penalized for incorrectly classifying these objects.
+
+- Use of Weight Maps in Loss Function: To down-weight the contribution of uninterested objects in the loss function, use a weight map that assigns lower weights to pixels of uninterested objects and higher weights to pixels of interested objects. This tells the model that misclassifying the uninterested objects is less penalizing than misclassifying the interested objects.
+
+
+# TODO
+- Write transforms and change datasets to receive them.
+    - Getitem returns np.arrays, transforms are applied, np.arrays are turned to tensors.
+    - Apply Albumentation transforms to np.arrays.
+    - Image array must have shape [H, W, C], while mask array can have shape [H, W].
+- Write `DataModule` class.
 - Define `ValidationDataset` (make this val dataset and the training dataset subclasses of a general dataset class?), with grid patch extraction. Decide whether to use the same approach or try returning a batch of patches. Try with an imported model to verify that training and validation batches may have different shapes.
 
 
@@ -36,7 +46,3 @@ Conclusion: the two methods have the same speed.
 
 
 
-### How to deal with the "other" category.
-- Custom Loss Function: Design a custom loss function that effectively ignores the pixels of objects you are not interested in. This can be complex but might allow for more nuanced ontrol of how your model learns from the 'unwanted' objects. For example, the loss for the 'unwanted' objects could be set to zero, so the model is not penalized for incorrectly classifying these objects.
-
-- Use of Weight Maps in Loss Function: To down-weight the contribution of uninterested objects in the loss function, use a weight map that assigns lower weights to pixels of uninterested objects and higher weights to pixels of interested objects. This tells the model that misclassifying the uninterested objects is less penalizing than misclassifying the interested objects.

@@ -8,25 +8,34 @@ def from_png_to_semantic_mask (mask: np.ndarray):
     channel semantic segmentation mask with category IDs as
     pixel values   
     '''    
-
+    ## First version
+    # category_colors = {
+    #     'other': [(112, 150, 146),
+    #     (2, 135, 115),
+    #     (9, 143, 150),
+    #     (0, 0, 0),
+    #     (119, 11, 32),
+    #     (102, 51, 0),
+    #     (255, 0, 0),
+    #     (190, 153, 153),
+    #     (0, 50, 89),
+    #     (153, 153, 153)],
+    #     'ground': [(128, 64, 128), (112, 103, 87), (130, 76, 0), (48, 41, 30)],
+    #     'vegetation': [(0, 102, 0), (107, 142, 35), (51, 51, 0), (190, 250, 190)],
+    #     'buildings': [(70, 70, 70), (102, 102, 156), (254, 228, 12), (254, 148, 12)],
+    #     'water': [(28, 42, 168)],
+    #     'person': [(255, 22, 96)]
+    # }
+    
+    # Second version
     category_colors = {
-        'other': [(112, 150, 146),
-        (2, 135, 115),
-        (9, 143, 150),
-        (0, 0, 0),
-        (119, 11, 32),
-        (102, 51, 0),
-        (255, 0, 0),
-        (190, 153, 153),
-        (0, 50, 89),
-        (153, 153, 153)],
+        'other': [(112, 150, 146), (2, 135, 115), (9, 143, 150), (0, 0, 0), (119, 11, 32), (102, 51, 0), (255, 0, 0)],
         'ground': [(128, 64, 128), (112, 103, 87), (130, 76, 0), (48, 41, 30)],
         'vegetation': [(0, 102, 0), (107, 142, 35), (51, 51, 0), (190, 250, 190)],
-        'buildings': [(70, 70, 70), (102, 102, 156), (254, 228, 12), (254, 148, 12)],
+        'buildings': [(70, 70, 70), (102, 102, 156), (254, 228, 12), (254, 148, 12), (0, 50, 89), (190, 153, 153), (153, 153, 153)],
         'water': [(28, 42, 168)],
         'person': [(255, 22, 96)]
     }
-
 
     category_ids = {
         'other': 0,
@@ -85,7 +94,7 @@ def get_grid_bboxs(side: int, overlap: float, max_height: int, max_width: int) -
         
         for j in range(n_bboxs_along_width -1):
             top_left = (bboxs[-1][0][0], bboxs[-1][0][1] + stride)
-            bottom_right = (bboxs[-1][1][0], bboxs[-1][1][1] + stride)
+            bottom_right = (bboxs[-1][1][0], bboxs[-1][1][1] + stride)  
             new_bbox = (top_left, bottom_right)
             bboxs.append(new_bbox)
             
