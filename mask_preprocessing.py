@@ -7,6 +7,8 @@ import cv2
 from tqdm import tqdm
 from multiprocessing import Pool
 import yaml
+from PIL import Image
+import skimage
 
 with open('config.yaml', 'r') as file:
     cfg = yaml.safe_load(file)
@@ -21,28 +23,9 @@ def process_file(filepath):
     mask = cv2.imread(filepath)
     mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB) # required for conversion to color to category label
     mask = cv2.resize(mask, (3000, 2000), interpolation=cv2.INTER_NEAREST)
-    semantic_mask = from_png_to_semantic_mask(mask)
+    semantic_mask = from_png_to_semantic_mask(mask) 
     semantic_mask = semantic_mask.astype(np.uint8)
-    cv2.imwrite(os.path.join(cfg['masks_dir'], filename) + '.jpg', semantic_mask)    
+    cv2.imwrite(os.path.join(cfg['masks_dir'], filename) + '.png', semantic_mask)
 
-with Pool(processes=16) as pool: 
+with Pool(processes=cfg['n_workers']) as pool: 
     semantic_masks = list(tqdm(pool.imap(process_file, original_mask_filepaths), total=len(original_mask_filepaths)))
-
-# # To save a unique array
-# def process_file(filepath):
-#     filename = os.path.basename(filepath).split('.')[0]
-#     mask = cv2.imread(filepath)
-#     mask = cv2.cvtColor(mask, cv2.COLOR_BGR2RGB)
-#     mask = cv2.resize(mask, (3000, 2000), interpolation=cv2.INTER_NEAREST)
-#     semantic_mask = from_png_to_semantic_mask(mask)
-#     semantic_mask = semantic_mask.astype(np.uint8)
-#     return semantic_mask
-#
-# with Pool(processes=cpu_count()) as pool: 
-#     semantic_masks_ls = list(tqdm(pool.imap(process_file, original_mask_filepaths), total=len(original_mask_filepaths)))
-#     semantic_masks_arr = np.stack(semantic_masks_ls, axis=0)
-#     np.save(file=f'data/masks.npy', arr=semantic_masks_arr)
-    
-    
-
-

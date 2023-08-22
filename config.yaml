@@ -5,3 +5,5 @@ n_random_patches_per_image: 28
 
 patch_size: 256
 patch_overlap: 0.5
+
+n_workers: 12

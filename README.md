@@ -34,7 +34,8 @@ Conclusion: the two methods have the same speed.
 - Write transforms and change datasets to receive them.
     - Getitem returns np.arrays, transforms are applied, np.arrays are turned to tensors.
     - Apply Albumentation transforms to np.arrays.
-    - Image array must have shape [H, W, C], while mask array can have shape [H, W].
+    - For transforms, Image array must have shape [H, W, C], while mask array can have shape [H, W].
+    - Add standardization of images before returning the image.
 - Write `DataModule` class.
 - Define `ValidationDataset` (make this val dataset and the training dataset subclasses of a general dataset class?), with grid patch extraction. Decide whether to use the same approach or try returning a batch of patches. Try with an imported model to verify that training and validation batches may have different shapes.
 

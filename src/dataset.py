@@ -131,14 +131,14 @@ class TrainingDataset(torch.utils.data.Dataset):
         '''Use generated bboxs to load the corresponding image and mask and 
         return a single patch. Leverages PIL's lazy loading to fast loading.
         '''
-        filename = self.patch_bboxs[idx][0]
+        filename = os.path.splitext(self.patch_bboxs[idx][0])[0] # without extension
         bbox = self.patch_bboxs[idx][1]
         # Get image patch
-        with Image.open(os.path.join(self.images_dir, filename)) as image:
+        with Image.open(os.path.join(self.images_dir, filename + '.jpg')) as image:
             image_patch = image.crop((bbox[0][1], bbox[0][0], bbox[1][1], bbox[1][0])) # PIL works in (width, height)
             image_patch = np.array(image_patch)
         # Get mask patch
-        with Image.open(os.path.join(self.masks_dir, filename)) as mask:
+        with Image.open(os.path.join(self.masks_dir, filename + '.png')) as mask:
             mask_patch = mask.crop((bbox[0][1], bbox[0][0], bbox[1][1], bbox[1][0]))
             mask_patch = np.array(mask_patch)
                 
@@ -150,9 +150,32 @@ class TrainingDataset(torch.utils.data.Dataset):
         
         return image_patch, mask_patch
     
+    def reset_patch_bboxs(self):
+        '''To generate again the list of bboxs.
+        '''
+        self.patch_bboxs = self.generate_patch_bboxs()
+    
     def __len__(self):
         return len(self.patch_bboxs)
+
+
+class RandomBBoxSampler(torch.utils.data.Sampler):
+    '''Sampler class used to re-initialize the bbox list at
+    the start of each epoch, so that different epochs have different
+    patches. Without this sampler, the DataModule class would instantiate
+    the Dataset object and then the bbox would be the same for all epochs. 
+    '''
+    def __init__(self, dataset):
+        self.dataset = dataset
+        
+    def __iter__(self):
+        self.dataset.reset_patch_bboxs()
+        return iter(range(len(self.dataset)))
     
+    def __len__(self):
+        return len(self.dataset)      
+
+
 
 if __name__ == '__main__':
     # Test dataloading speed
@@ -167,16 +190,48 @@ if __name__ == '__main__':
         
     dataset = TrainingDataset(
         image_filepaths = image_filepaths,
-        mask_filepaths =mask_filepaths,
+        mask_filepaths = mask_filepaths,
         n_random_patches_per_image = cfg['n_random_patches_per_image'],
         patch_size = cfg['patch_size']
     )
     
-    print(len(dataset))    
-    print(dataset[54][0].shape, dataset[54][1].shape)
-    print(dataset[54][0].dtype, dataset[54][1].dtype)
+    # # Just a check
+    # print(len(dataset))    
+    # print(dataset[54][0].shape, dataset[54][1].shape)
+    # print(dataset[54][0].dtype, dataset[54][1].dtype)
+       
+    # # Test dataloader speed
+    # dataloader = torch.utils.data.DataLoader(dataset, batch_size=32, num_workers=14, shuffle=True)
+    # for batch in tqdm(dataloader):
+    #     continue
     
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=8, num_workers=14, shuffle=True)
+    # # Proof that without the sampler, the same bboxs are used for all the epochs
+    # # Epoch 1
+    # total1 = 0
+    # for batch in tqdm(dataloader):
+    #     total1 += batch[0].sum().item()
+    # print(total1)
+    # # Epoch 2
+    # total2 = 0
+    # for batch in tqdm(dataloader):
+    #     total2 += batch[0].sum().item()  
+    # print(total2)
     
+    sampler = RandomBBoxSampler(dataset)
+    dataloader = torch.utils.data.DataLoader(dataset, sampler=sampler, batch_size=32, num_workers=12)
     for batch in tqdm(dataloader):
         continue
+    
+    # # Proof that with the sampler, the different bboxs are used for all the epochs
+    # sampler = RandomBBoxSampler(dataset)
+    # dataloader = torch.utils.data.DataLoader(dataset, sampler=sampler, batch_size=32, num_workers=12)
+    # # Epoch 1
+    # total1 = 0
+    # for batch in tqdm(dataloader):
+    #     total1 += batch[0].sum().item()
+    # print(total1)
+    # # Epoch 2
+    # total2 = 0
+    # for batch in tqdm(dataloader):
+    #     total2 += batch[0].sum().item()  
+    # print(total2)
