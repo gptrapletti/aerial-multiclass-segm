@@ -31,19 +31,9 @@ Conclusion: the two methods have the same speed.
 
 
 # TODO
-- Write transforms and change datasets to receive them.
-    - Getitem returns np.arrays, transforms are applied, np.arrays are turned to tensors.
-    - Apply Albumentation transforms to np.arrays.
-    - For transforms, Image array must have shape [H, W, C], while mask array can have shape [H, W].
-    - Add standardization of images before returning the image.
+- Define `ValidationDataset`, with grid patch extraction. Add transforms too.
 - Write `DataModule` class.
-- Define `ValidationDataset` (make this val dataset and the training dataset subclasses of a general dataset class?), with grid patch extraction. Decide whether to use the same approach or try returning a batch of patches. Try with an imported model to verify that training and validation batches may have different shapes.
 
-
-- Dataset con PIL (n=400), estrazione patch 512x512, batch=8, n_workers=12 --> ~ 11 min (69s for 10%)
-    - con batch=32 --> (82s per 10%).
-    - con batch=2 si guadagnagno ~10s.
-- Dataset con PIL (n=400), con estrazione patch 512x512, poi resized a 256x256, batch=8, n_workers=12 --> ~ 14 min (83s for 10%)
 
 
 

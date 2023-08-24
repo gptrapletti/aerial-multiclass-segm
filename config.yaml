@@ -1,5 +1,8 @@
 images_dir: data/images
 masks_dir: data/masks
+train_split: 250 # 0.625%
+val_split: 100 # 0.25%
+test_split: 50 # 0.125%
 
 n_random_patches_per_image: 28
 

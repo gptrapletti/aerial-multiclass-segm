@@ -5,7 +5,9 @@ from typing import List
 import numpy as np
 import yaml
 from PIL import Image
+import albumentations as A
 from utils import generate_random_non_overlapping_bboxs
+from sampler import RandomBBoxSampler
 
 # class TrainingDataset(torch.utils.data.Dataset): ### ! old version
 #     '''Dataset for training, with random overlapping patches, cache,
@@ -97,12 +99,14 @@ class TrainingDataset(torch.utils.data.Dataset):
         mask_filepaths: List[str],
         n_random_patches_per_image: int,
         patch_size: int,
+        transforms = None
     ):
         super().__init__()
         self.image_filepaths = image_filepaths
         self.mask_filepaths = mask_filepaths
         self.n_random_patches_per_image = n_random_patches_per_image
         self.patch_size = patch_size
+        self.transforms = transforms
         self.patch_bboxs = self.generate_patch_bboxs()
         self.cache = OrderedDict()
         self.images_dir = os.path.dirname(image_filepaths[0])
@@ -141,11 +145,26 @@ class TrainingDataset(torch.utils.data.Dataset):
         with Image.open(os.path.join(self.masks_dir, filename + '.png')) as mask:
             mask_patch = mask.crop((bbox[0][1], bbox[0][0], bbox[1][1], bbox[1][0]))
             mask_patch = np.array(mask_patch)
+        
+        needs_standardization = True
+        
+        # Apply transforms
+        if self.transforms:
+            transformed = self.transforms(image=image_patch, mask=mask_patch)
+            image_patch = transformed['image']
+            mask_patch = transformed['mask']
+            
+            if any(isinstance(t, A.Normalize) for t in self.transforms.transforms):
+                needs_standardization = False
+        
+        # Standardization
+        if needs_standardization:
+            image_patch = image_patch / 255.0               
                 
         image_patch = torch.from_numpy(image_patch).permute(2, 0, 1)
         mask_patch = torch.from_numpy(mask_patch)
         
-        image_patch = image_patch.type(torch.uint8)
+        image_patch = image_patch.type(torch.float32)
         mask_patch = mask_patch.type(torch.uint8)
         
         return image_patch, mask_patch
@@ -157,24 +176,6 @@ class TrainingDataset(torch.utils.data.Dataset):
     
     def __len__(self):
         return len(self.patch_bboxs)
-
-
-class RandomBBoxSampler(torch.utils.data.Sampler):
-    '''Sampler class used to re-initialize the bbox list at
-    the start of each epoch, so that different epochs have different
-    patches. Without this sampler, the DataModule class would instantiate
-    the Dataset object and then the bbox would be the same for all epochs. 
-    '''
-    def __init__(self, dataset):
-        self.dataset = dataset
-        
-    def __iter__(self):
-        self.dataset.reset_patch_bboxs()
-        return iter(range(len(self.dataset)))
-    
-    def __len__(self):
-        return len(self.dataset)      
-
 
 
 if __name__ == '__main__':
@@ -217,12 +218,13 @@ if __name__ == '__main__':
     #     total2 += batch[0].sum().item()  
     # print(total2)
     
+    # Test speed
     sampler = RandomBBoxSampler(dataset)
     dataloader = torch.utils.data.DataLoader(dataset, sampler=sampler, batch_size=32, num_workers=12)
     for batch in tqdm(dataloader):
         continue
     
-    # # Proof that with the sampler, the different bboxs are used for all the epochs
+    # # Proof that with the sampler, different bboxs are used for all the epochs
     # sampler = RandomBBoxSampler(dataset)
     # dataloader = torch.utils.data.DataLoader(dataset, sampler=sampler, batch_size=32, num_workers=12)
     # # Epoch 1

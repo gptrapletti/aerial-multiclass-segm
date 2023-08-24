@@ -90,8 +90,7 @@ def get_grid_bboxs(side: int, overlap: float, max_height: int, max_width: int) -
     bbox_reference = ((0, 0), (256, 256))
     bboxs.append(bbox_reference)
 
-    for i in range(n_bboxs_along_height):
-        
+    for i in range(n_bboxs_along_height):        
         for j in range(n_bboxs_along_width -1):
             top_left = (bboxs[-1][0][0], bboxs[-1][0][1] + stride)
             bottom_right = (bboxs[-1][1][0], bboxs[-1][1][1] + stride)  
@@ -153,7 +152,6 @@ def generate_random_non_overlapping_bboxs(n_bboxs, side, max_height, max_width):
                 bboxs.append(bbox_i)
                 
     return bboxs   
-
 
 if __name__ == '__main__':
     
