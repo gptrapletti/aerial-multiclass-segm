@@ -3,6 +3,11 @@ from typing import List, Tuple
 import random
 from shapely import Polygon
 
+def create_filename(idx, extension='.jpg'):
+    n_zeroes = 3 - len(str(idx))
+    filename = '0' * n_zeroes + str(idx) + extension
+    return filename
+
 def from_png_to_semantic_mask (mask: np.ndarray):
     '''Gets a 3 channels RGB mask array and turns it into a single
     channel semantic segmentation mask with category IDs as

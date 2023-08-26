@@ -6,6 +6,7 @@
 - Drone images, not satellite eheh!
 - Images and masks are resized from  4000x6000 pixels to 2000x3000 pixels and saved to disk. This mitigates computation while still keeping the images large enough to be challenging.
 - Masks are also remapped to single channel masks with progressive category labels as pixel values and saved to disk.
+- Both images and masks are renamed 1-400.
 - Extract 256x256 px patches in a random fashion for training, while in a grid fashion for validation and testing. Extract patches with overlap (25% or 50%) for val and test, but without addressing the overlap via averaging.
 - Later, after training and testing, on the test set, we want to see a complete prediction on each image. So overlapping predictions are averaged to create a full mask (3000x4000 px) and a whole-image metric can also be computed.
 
@@ -32,7 +33,19 @@ Conclusion: the two methods have the same speed.
 
 # TODO
 - Define `ValidationDataset`, with grid patch extraction. Add transforms too.
-- Write `DataModule` class.
+    - V1:
+        - build bboxs list as for training dataset.
+        - the dataset getitem returns single patches.
+        - dataloader batch size set to 96 (corresponding to an entire image), so batch shape is [96, 3, 256, 256].
+        - actually, in case that batch size is too large, a lower batch size can be used (the fact that a batch would be smaller than an entire image should not be a problem.)
+    - V2:
+        - getitem reads an image.
+        - the 96 patches are extracted.
+        - getitem returns a tensor [96, 3, 256, 256].
+        - dataloader set with batch size = 1, so it returns directly a tensor with shape [96, 3, 256, 256].
+        - there may be memory contraints with a batch so large and to reduce it in this case would be difficult.
+    - define general dataset class to be inherited by the training and val datasets, for their getitem is the same.
+- Write `DataModule` class. Maybe then remove the `images_dir` and `masks_dir` attributes from the datasets.
 
 
 

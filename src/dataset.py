@@ -6,7 +6,7 @@ import numpy as np
 import yaml
 from PIL import Image
 import albumentations as A
-from utils import generate_random_non_overlapping_bboxs
+from utils import generate_random_non_overlapping_bboxs, get_grid_bboxs
 from sampler import RandomBBoxSampler
 
 # class TrainingDataset(torch.utils.data.Dataset): ### ! old version
@@ -108,7 +108,6 @@ class TrainingDataset(torch.utils.data.Dataset):
         self.patch_size = patch_size
         self.transforms = transforms
         self.patch_bboxs = self.generate_patch_bboxs()
-        self.cache = OrderedDict()
         self.images_dir = os.path.dirname(image_filepaths[0])
         self.masks_dir = os.path.dirname(mask_filepaths[0])
    
@@ -161,8 +160,8 @@ class TrainingDataset(torch.utils.data.Dataset):
         if needs_standardization:
             image_patch = image_patch / 255.0               
                 
-        image_patch = torch.from_numpy(image_patch).permute(2, 0, 1)
-        mask_patch = torch.from_numpy(mask_patch)
+        image_patch = torch.from_numpy(image_patch).permute(2, 0, 1) # shape = [C, H, W]
+        mask_patch = torch.from_numpy(mask_patch) # shape = [H, W]
         
         image_patch = image_patch.type(torch.float32)
         mask_patch = mask_patch.type(torch.uint8)
@@ -178,23 +177,103 @@ class TrainingDataset(torch.utils.data.Dataset):
         return len(self.patch_bboxs)
 
 
+class ValidationDataset(torch.utils.data.Dataset):
+    '''Dataset class for validation, where patches are extracted
+    in a grid with no overlap.'''
+    def __init__(
+        self,
+        image_filepaths: List[str],
+        mask_filepaths: List[str],
+        patch_size: int,
+        transforms = None        
+    ):
+        super().__init__()
+        self.image_filepaths = image_filepaths
+        self.mask_filepaths = mask_filepaths
+        self.patch_size = patch_size
+        self.transforms = transforms
+        self.grid_bboxs = get_grid_bboxs( # create grid bboxs, the same for all images
+            side=self.patch_size, 
+            overlap=0, 
+            max_height=2000,
+            max_width=3000
+        )
+        self.patch_bboxs = self.generate_grid_patch_bboxs()
+        self.images_dir = os.path.dirname(image_filepaths[0])
+        self.masks_dir = os.path.dirname(mask_filepaths[0])
+    
+    def generate_grid_patch_bboxs(self):
+        '''As for trianing, creates a list with bboxs for each image and mask'''
+        patch_bboxs = []
+        for i in range(len(self.image_filepaths)):
+            filename = os.path.basename(self.image_filepaths[i])
+            for bbox in self.grid_bboxs:
+                patch_bboxs.append((filename, bbox))
+
+        return patch_bboxs                
+        
+    
+    def __getitem__(self, idx):
+        '''Use the same grid bbox coordinates to extract patches
+        from images and mask. Returns all the patches for the 
+        loaded image'''
+        filename = os.path.splitext(self.patch_bboxs[idx][0])[0] # without extension
+        bbox = self.patch_bboxs[idx][1]
+        # Get image patch
+        with Image.open(os.path.join(self.images_dir, filename + '.jpg')) as image:
+            image_patch = image.crop((bbox[0][1], bbox[0][0], bbox[1][1], bbox[1][0])) # PIL works in (width, height)
+            image_patch = np.array(image_patch)
+        # Get mask patch
+        with Image.open(os.path.join(self.masks_dir, filename + '.png')) as mask:
+            mask_patch = mask.crop((bbox[0][1], bbox[0][0], bbox[1][1], bbox[1][0]))
+            mask_patch = np.array(mask_patch)
+        
+        needs_standardization = True
+        
+        # Apply transforms
+        if self.transforms:
+            transformed = self.transforms(image=image_patch, mask=mask_patch)
+            image_patch = transformed['image']
+            mask_patch = transformed['mask']
+            
+            if any(isinstance(t, A.Normalize) for t in self.transforms.transforms):
+                needs_standardization = False
+        
+        # Standardization
+        if needs_standardization:
+            image_patch = image_patch / 255.0               
+                
+        image_patch = torch.from_numpy(image_patch).permute(2, 0, 1) # shape = [C, H, W]
+        mask_patch = torch.from_numpy(mask_patch) # shape = [H, W]
+        
+        image_patch = image_patch.type(torch.float32)
+        mask_patch = mask_patch.type(torch.uint8)
+        
+        return image_patch, mask_patch
+       
+    def __len__(self):
+        return len(self.patch_bboxs)
+        
+       
+    
+
 if __name__ == '__main__':
-    # Test dataloading speed
+    # To test dataloading speed
     
     from tqdm import tqdm
     
     with open('config.yaml', 'r') as f:
         cfg = yaml.safe_load(f)
         
-    image_filepaths = sorted([os.path.join(cfg['images_dir'], filename) for filename in os.listdir(os.path.join(cfg['images_dir']))])
-    mask_filepaths = sorted([os.path.join(cfg['masks_dir'], filename) for filename in os.listdir(os.path.join(cfg['masks_dir']))])
+    image_filepaths = sorted([os.path.join(cfg['images_dir'], filename) for filename in os.listdir(os.path.join(cfg['images_dir']))])[:100]
+    mask_filepaths = sorted([os.path.join(cfg['masks_dir'], filename) for filename in os.listdir(os.path.join(cfg['masks_dir']))])[:100]
         
-    dataset = TrainingDataset(
-        image_filepaths = image_filepaths,
-        mask_filepaths = mask_filepaths,
-        n_random_patches_per_image = cfg['n_random_patches_per_image'],
-        patch_size = cfg['patch_size']
-    )
+    # dataset = TrainingDataset(
+    #     image_filepaths = image_filepaths,
+    #     mask_filepaths = mask_filepaths,
+    #     n_random_patches_per_image = cfg['n_random_patches_per_image'],
+    #     patch_size = cfg['patch_size']
+    # )
     
     # # Just a check
     # print(len(dataset))    
@@ -207,6 +286,7 @@ if __name__ == '__main__':
     #     continue
     
     # # Proof that without the sampler, the same bboxs are used for all the epochs
+    # dataloader = torch.utils.data.DataLoader(dataset, batch_size=32, num_workers=14, shuffle=False)
     # # Epoch 1
     # total1 = 0
     # for batch in tqdm(dataloader):
@@ -218,11 +298,11 @@ if __name__ == '__main__':
     #     total2 += batch[0].sum().item()  
     # print(total2)
     
-    # Test speed
-    sampler = RandomBBoxSampler(dataset)
-    dataloader = torch.utils.data.DataLoader(dataset, sampler=sampler, batch_size=32, num_workers=12)
-    for batch in tqdm(dataloader):
-        continue
+    # # # Test speed with sampler
+    # sampler = RandomBBoxSampler(dataset)
+    # dataloader = torch.utils.data.DataLoader(dataset, sampler=sampler, batch_size=32, num_workers=12)
+    # for batch in tqdm(dataloader):
+    #     continue
     
     # # Proof that with the sampler, different bboxs are used for all the epochs
     # sampler = RandomBBoxSampler(dataset)
@@ -237,3 +317,14 @@ if __name__ == '__main__':
     # for batch in tqdm(dataloader):
     #     total2 += batch[0].sum().item()  
     # print(total2)
+    
+    val_dataset = ValidationDataset(
+        image_filepaths = image_filepaths,
+        mask_filepaths = mask_filepaths,
+        patch_size = cfg['patch_size']
+    )
+    
+    # Test dataloader speed
+    val_dataloader = torch.utils.data.DataLoader(val_dataset, batch_size=96, num_workers=14, shuffle=False)
+    for batch in tqdm(val_dataloader):
+        continue

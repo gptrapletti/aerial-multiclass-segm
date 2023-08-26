@@ -4,18 +4,19 @@ import os
 import cv2
 import yaml
 from tqdm import tqdm
+from src.utils import create_filename
 
 with open('config.yaml', 'r') as f:
     cfg = yaml.safe_load(f)
 
-image_filepaths = sorted([os.path.join('data/images_4000_6000', filename) for filename in os.listdir(os.path.join('data/images_4000_6000'))])
+image_filepaths = sorted([os.path.join('data/images_original', filename) for filename in os.listdir(os.path.join('data/images_original'))])
 
 for i in tqdm(range(len(image_filepaths))):
     filepath = image_filepaths[i]
-    filename = os.path.splitext(os.path.basename(filepath))[0] # without extension
     image = cv2.imread(filepath)
     image = cv2.resize(image, (3000, 2000))
-    dst_filepath = os.path.join(cfg['images_dir'], filename + '.jpg')
+    filename = create_filename(i + 1, extension='.jpg')
+    dst_filepath = os.path.join(cfg['images_dir'], filename)
     cv2.imwrite(dst_filepath, image)
   
 

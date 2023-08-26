@@ -1,12 +1,16 @@
+data_path: data
 images_dir: data/images
 masks_dir: data/masks
+split_path: data/split.json
+
 train_split: 250 # 0.625%
 val_split: 100 # 0.25%
 test_split: 50 # 0.125%
 
 n_random_patches_per_image: 28
-
 patch_size: 256
 patch_overlap: 0.5
 
-n_workers: 12
+train_batch_size: 32
+val_batch_size: 32
+num_workers: 12
