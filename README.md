@@ -37,7 +37,7 @@ Conclusion: the two methods have the same speed.
         - build bboxs list as for training dataset.
         - the dataset getitem returns single patches.
         - dataloader batch size set to 96 (corresponding to an entire image), so batch shape is [96, 3, 256, 256].
-        - actually, in case that batch size is too large, a lower batch size can be used (the fact that a batch would be smaller than an entire image should not be a problem.)
+        - actually, in case that batch size is too large, a lower batch size can be used (the fact that a batch would be smaller than an entire image should not be a problem in the training phase.)
     - V2:
         - getitem reads an image.
         - the 96 patches are extracted.

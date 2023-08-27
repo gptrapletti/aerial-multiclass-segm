@@ -22,7 +22,7 @@ train_transforms = A.Compose([
     # A.Normalize(mean=(0.4456, 0.4436, 0.4018), std=(0.2220, 0.2154, 0.2298), p=1) # mean and std computed on this dataset.    
 ])
 
-test_transforms = A.Compose([
+val_transforms = A.Compose([
     # A.Normalize(mean=(0.4456, 0.4436, 0.4018), std=(0.2220, 0.2154, 0.2298), p=1) # mean and std computed on this dataset
 ])
 

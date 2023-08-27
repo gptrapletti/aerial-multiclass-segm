@@ -1,6 +1,6 @@
 import torch
 
-class RandomBBoxSampler(torch.utils.data.Sampler):
+class AerialSampler(torch.utils.data.Sampler):
     '''Sampler class used to re-initialize the bbox list at
     the start of each epoch, so that different epochs have different
     patches. Without this sampler, the DataModule class would instantiate
