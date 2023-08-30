@@ -5,3 +5,8 @@ data/
 # data/masks/*
 plots/
 __pycache__/
+
+.env
+
+nb_01.ipynb
+nb_02.ipynb

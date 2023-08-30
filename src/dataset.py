@@ -118,6 +118,7 @@ class ValidationDataset(AerialDataset):
         image_filepaths: List[str],
         mask_filepaths: List[str],
         patch_size: int,
+        overlap: int,
         transforms: Optional[A.Compose] = None        
     ):
         super().__init__(
@@ -125,12 +126,13 @@ class ValidationDataset(AerialDataset):
             mask_filepaths = mask_filepaths,
             transforms = transforms,
         )
-        self.patch_size = patch_size        
+        self.patch_size = patch_size
+        self.overlap = overlap     
         self.grid_bboxs = get_grid_bboxs( # create grid bboxs, the same for all images
-            side=self.patch_size, 
-            overlap=0, 
-            max_height=2000,
-            max_width=3000
+            side = self.patch_size, 
+            overlap = self.overlap, 
+            max_height = 2000,
+            max_width = 3000
         )
         self.patch_bboxs = self.generate_grid_patch_bboxs()
         self.images_dir = os.path.dirname(image_filepaths[0])

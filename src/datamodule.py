@@ -21,6 +21,7 @@ class AerialDataModule(pl.LightningDataModule):
         split_path: str,
         n_random_patches_per_image: int,
         patch_size: int,
+        overlap: int,
         train_batch_size: int,
         val_batch_size: int,
         num_workers: int,
@@ -34,6 +35,7 @@ class AerialDataModule(pl.LightningDataModule):
             self.split = json.load(file)
         self.n_random_patches_per_image = n_random_patches_per_image
         self.patch_size = patch_size
+        self.overlap = overlap
         self.train_batch_size = train_batch_size
         self.val_batch_size = val_batch_size
         self.num_workers = num_workers
@@ -66,6 +68,7 @@ class AerialDataModule(pl.LightningDataModule):
                 image_filepaths = val_image_filepaths,
                 mask_filepaths = val_mask_filepaths,
                 patch_size = self.patch_size,
+                overlap = self.overlap,
                 transforms = self.val_transforms
             )
             

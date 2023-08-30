@@ -158,6 +158,26 @@ def generate_random_non_overlapping_bboxs(n_bboxs, side, max_height, max_width):
                 
     return bboxs   
 
+
+def mask_to_one_hot(mask: np.ndarray, n_classes: int, size: int) -> np.ndarray:
+    '''Function to turn a patch mask with indexes (shape=[H, W]) to a
+    one-hot encoded patch mask (shape=[C, H, W], where C is the number of classes).
+    
+    Args:
+        mask: patch mask array.
+        n_classes: number of classes.
+        size: size of the mask.
+        
+    Returns:
+        one-hot encoded patch mask.
+    '''
+    mask_hot = np.zeros(shape=(n_classes, size, size), dtype=np.uint8)
+    for class_i in range(n_classes):
+        mask_hot[class_i, ...] = np.where(mask == class_i, 1, 0)
+        
+    return mask_hot
+
+
 if __name__ == '__main__':
     
     import os
