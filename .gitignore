@@ -5,6 +5,7 @@ data/
 # data/masks/*
 plots/
 __pycache__/
+lightning_logs/
 
 .env
 

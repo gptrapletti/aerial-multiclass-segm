@@ -2,6 +2,7 @@ import numpy as np
 from typing import List, Tuple
 import random
 from shapely import Polygon
+import torch
 
 def create_filename(idx, extension='.jpg'):
     n_zeroes = 3 - len(str(idx))
@@ -161,7 +162,7 @@ def generate_random_non_overlapping_bboxs(n_bboxs, side, max_height, max_width):
 
 def mask_to_one_hot(mask: np.ndarray, n_classes: int, size: int) -> np.ndarray:
     '''Function to turn a patch mask with indexes (shape=[H, W]) to a
-    one-hot encoded patch mask (shape=[C, H, W], where C is the number of classes).
+    one-hot encoded patch mask (shape=[H, W, C], where C is the number of classes).
     
     Args:
         mask: patch mask array.
@@ -171,11 +172,29 @@ def mask_to_one_hot(mask: np.ndarray, n_classes: int, size: int) -> np.ndarray:
     Returns:
         one-hot encoded patch mask.
     '''
-    mask_hot = np.zeros(shape=(n_classes, size, size), dtype=np.uint8)
+    mask_hot = np.zeros(shape=(size, size, n_classes))
     for class_i in range(n_classes):
-        mask_hot[class_i, ...] = np.where(mask == class_i, 1, 0)
+        mask_hot[..., class_i] = np.where(mask == class_i, 1, 0)
         
     return mask_hot
+
+
+def mask_to_labels (masks: torch.Tensor) -> torch.Tensor:
+    '''Turns mask batch tensor from one-hot encoding and shape [B, C, H, W]
+    to mask with category labels with shape [B, 1, H, W].
+    
+    Args:
+        masks: one-hot encoded mask batch tensor.
+    
+    Returns:
+        mask batch tensor with labels
+    '''
+    index_masks = torch.zeros(masks.shape[0], 1, masks.shape[2], masks.shape[3]).to(masks.device)
+    for idx, mask in enumerate(masks):
+        for label, channel in enumerate(mask):
+            index_masks[idx] += channel * label
+            
+    return index_masks.type(torch.uint8)   
 
 
 if __name__ == '__main__':
@@ -185,7 +204,7 @@ if __name__ == '__main__':
     from tqdm import tqdm
     from multiprocessing import Pool, cpu_count
     
-    mask_filepaths = sorted([os.path.join('data/masks', filename) for filename in os.listdir(os.path.join('data/masks'))]) ### ! remove the [:10]
+    mask_filepaths = sorted([os.path.join('data/masks', filename) for filename in os.listdir(os.path.join('data/masks'))])
     
     def process_file(filepath):
         mask = cv2.imread(filepath)

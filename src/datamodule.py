@@ -4,8 +4,8 @@ import os
 import json
 from typing import Optional, List
 import albumentations as A
-from dataset import TrainingDataset, ValidationDataset
-from sampler import AerialSampler
+from .dataset import TrainingDataset, ValidationDataset
+from .sampler import AerialSampler
 
 class AerialDataModule(pl.LightningDataModule):
     '''Datamodule class for aerial multiclass segmentation.
@@ -78,7 +78,8 @@ class AerialDataModule(pl.LightningDataModule):
             pass           
     
     def train_dataloader(self):
-        return DataLoader(dataset=self.train_dataset, batch_size=self.train_batch_size, shuffle=True, sampler=AerialSampler, num_workers=self.num_workers)
+        sampler = AerialSampler(self.train_dataset)
+        return DataLoader(dataset=self.train_dataset, batch_size=self.train_batch_size, shuffle=False, sampler=sampler, num_workers=self.num_workers)
     
     def val_dataloader(self):
         return DataLoader(dataset=self.val_dataset, batch_size=self.val_batch_size, shuffle=False, num_workers=self.num_workers)

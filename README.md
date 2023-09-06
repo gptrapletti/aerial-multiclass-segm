@@ -1,6 +1,6 @@
 ## Sources
 - Dataset website: https://www.tugraz.at/index.php?id=22387
-- Repo for similar dataset: https://github.com/aq   bewtra/Multi-Class-Aerial-Segmentation/tree/main
+- Repo for similar dataset: https://github.com/aqbewtra/Multi-Class-Aerial-Segmentation/tree/main
 
 ## General
 - Drone images, not satellite eheh!
@@ -29,12 +29,19 @@ Conclusion: the two methods have the same speed.
 
 - Use of Weight Maps in Loss Function: To down-weight the contribution of uninterested objects in the loss function, use a weight map that assigns lower weights to pixels of uninterested objects and higher weights to pixels of interested objects. This tells the model that misclassifying the uninterested objects is less penalizing than misclassifying the interested objects.
 
+
+## Hydra for configs
+`config.yaml` contains also classes to use to instantiate objects. In the training script, Hydra is used to read the yaml file and return the cfg dict, that contains the classes to use. Object are instantiated from those classes using `hydra.utils.instantiate()` and then passed to the LightningModule, DataModule, etc (see nb_01.ipynb).
+
+
 # TODO-LONG-TERM
-- Write test dataset class as described above..
+- Write test dataset class as described above.
 
 # TODO
-- Put mask to one hot function into utils and add it to the datasets.
-- Try model.
+- Add logger
+- Add checkpoints (save configs too)
+- Write train.py.
+- Write train script to train the pretrained smp.Unet.
 
 
 

@@ -11,6 +11,9 @@ n_random_patches_per_image: 28
 patch_size: 256
 patch_overlap: 0.5
 
-train_batch_size: 32
-val_batch_size: 32
+train_batch_size: 16
+val_batch_size: 16
 num_workers: 12
+
+loss_fn:
+  _target_: torch.nn.BCELoss

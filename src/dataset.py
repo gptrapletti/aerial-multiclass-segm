@@ -5,7 +5,7 @@ import numpy as np
 import yaml
 from PIL import Image
 import albumentations as A
-from utils import generate_random_non_overlapping_bboxs, get_grid_bboxs
+from .utils import generate_random_non_overlapping_bboxs, get_grid_bboxs, mask_to_one_hot
 
 class AerialDataset(torch.utils.data.Dataset):
     '''Generic dataset class'''
@@ -49,12 +49,14 @@ class AerialDataset(torch.utils.data.Dataset):
         # Standardization
         if needs_standardization:
             image_patch = image_patch / 255.0               
+        
+        mask_patch = mask_to_one_hot(mask=mask_patch, n_classes=6, size=self.patch_size)
                 
-        image_patch = torch.from_numpy(image_patch).permute(2, 0, 1) # shape = [C, H, W]
-        mask_patch = torch.from_numpy(mask_patch) # shape = [H, W]
+        image_patch = torch.from_numpy(image_patch).permute(2, 0, 1) # to shape [C, H, W]
+        mask_patch = torch.from_numpy(mask_patch).permute(2, 0, 1)
         
         image_patch = image_patch.type(torch.float32)
-        mask_patch = mask_patch.type(torch.uint8)
+        mask_patch = mask_patch.type(torch.float32) # or torch.uint8?
         
         return image_patch, mask_patch
     
@@ -219,7 +221,8 @@ if __name__ == '__main__':
     val_dataset = ValidationDataset(
         image_filepaths = image_filepaths[250:350],
         mask_filepaths = mask_filepaths[250:350],
-        patch_size = cfg['patch_size']
+        patch_size = cfg['patch_size'],
+        overlap = 0
     )
     
     # Just a check
