@@ -23,7 +23,6 @@ class AerialModule(pl.LightningModule):
         images, masks = batch
         preds = self(images)
         loss = self.loss_fn(input=preds, target=masks)
-        print(preds.device)
         metric = self.metric(preds=preds, target=mask_to_labels(masks))
         self.log('train_loss', loss, prog_bar=True)
         self.log('train_metric', metric, prog_bar=True)

@@ -21,7 +21,7 @@ class AerialDataModule(pl.LightningDataModule):
         split_path: str,
         n_random_patches_per_image: int,
         patch_size: int,
-        overlap: int,
+        overlap: float,
         train_batch_size: int,
         val_batch_size: int,
         num_workers: int,

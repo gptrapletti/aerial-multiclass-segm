@@ -6,6 +6,8 @@ data/
 plots/
 __pycache__/
 lightning_logs/
+mlruns/
+checkpoints/
 
 .env
 

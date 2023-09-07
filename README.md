@@ -38,10 +38,8 @@ Conclusion: the two methods have the same speed.
 - Write test dataset class as described above.
 
 # TODO
-- Add logger
-- Add checkpoints (save configs too)
-- Write train.py.
-- Write train script to train the pretrained smp.Unet.
+- Save configs in MLFlow runs (https://github.com/Lightning-AI/lightning/issues/11736).
+- Train better.
 
 
 

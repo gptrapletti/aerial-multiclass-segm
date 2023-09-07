@@ -1,19 +1,30 @@
+# Datamodule
 data_path: data
 images_dir: data/images
 masks_dir: data/masks
 split_path: data/split.json
+n_random_patches_per_image: 28
+patch_size: 256
+overlap: 0
+train_batch_size: 24
+val_batch_size: 24
+num_workers: 12
 
+# Model and training
+lr: 0.00001
+epochs: 20
+
+
+# General
 train_split: 250 # 0.625%
 val_split: 100 # 0.25%
 test_split: 50 # 0.125%
 
-n_random_patches_per_image: 28
-patch_size: 256
-patch_overlap: 0.5
+# Run
+experiment_name: 'aerial-multiclass-seg'
+run_name: 'default'
 
-train_batch_size: 16
-val_batch_size: 16
-num_workers: 12
 
-loss_fn:
-  _target_: torch.nn.BCELoss
+
+# loss_fn:
+#   _target_: torch.nn.BCELoss
