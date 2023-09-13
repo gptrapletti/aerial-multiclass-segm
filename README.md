@@ -38,7 +38,7 @@ Conclusion: the two methods have the same speed.
 - Write test dataset class as described above.
 
 # TODO
-- Save configs in MLFlow runs (https://github.com/Lightning-AI/lightning/issues/11736).
+- Try create custom logger class to deal with all the logging code in train.py.
 - Train better.
 
 
