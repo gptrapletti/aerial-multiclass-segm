@@ -93,7 +93,7 @@ def get_grid_bboxs(side: int, overlap: float, max_height: int, max_width: int) -
     n_bboxs_along_width = 1 + ((max_width - side) // stride)
 
     bboxs = []
-    bbox_reference = ((0, 0), (256, 256))
+    bbox_reference = ((0, 0), (side, side))
     bboxs.append(bbox_reference)
 
     for i in range(n_bboxs_along_height):        

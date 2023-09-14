@@ -38,7 +38,7 @@ Conclusion: the two methods have the same speed.
 - Write test dataset class as described above.
 
 # TODO
-- Try create custom logger class to deal with all the logging code in train.py.
+- Custom Loss.
 - Train better.
 
 

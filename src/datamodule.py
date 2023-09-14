@@ -62,8 +62,8 @@ class AerialDataModule(pl.LightningDataModule):
                 transforms = self.train_transforms
             )   
             # Val
-            val_image_filepaths = [self.image_filepaths[i] for i in range(len(self.image_filepaths)) if i+1 in self.val_idxs][:2] ### ! remove [:2]
-            val_mask_filepaths = [self.mask_filepaths[i] for i in range(len(self.mask_filepaths)) if i+1 in self.val_idxs][:2] ### ! remove [:2]
+            val_image_filepaths = [self.image_filepaths[i] for i in range(len(self.image_filepaths)) if i+1 in self.val_idxs]
+            val_mask_filepaths = [self.mask_filepaths[i] for i in range(len(self.mask_filepaths)) if i+1 in self.val_idxs]
             self.val_dataset = ValidationDataset(
                 image_filepaths = val_image_filepaths,
                 mask_filepaths = val_mask_filepaths,

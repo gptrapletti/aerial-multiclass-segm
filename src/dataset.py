@@ -141,7 +141,7 @@ class ValidationDataset(AerialDataset):
         self.masks_dir = os.path.dirname(mask_filepaths[0])
     
     def generate_grid_patch_bboxs(self):
-        '''As for trianing, creates a list with bboxs for each image and mask'''
+        '''As for training, creates a list with bboxs for each image and mask'''
         patch_bboxs = []
         for i in range(len(self.image_filepaths)):
             filename = os.path.basename(self.image_filepaths[i])
