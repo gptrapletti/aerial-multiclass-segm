@@ -38,9 +38,9 @@ Conclusion: the two methods have the same speed.
 - Write test dataset class as described above.
 
 # TODO
-- Custom Loss.
-- Train better.
-
-
+- Complete CE weight test.
+- Go full hydra.
+- Custom Loss: weighted loss (class other weight = 0) + dice loss for boundaries.
+- Try train with different lr.
 
 

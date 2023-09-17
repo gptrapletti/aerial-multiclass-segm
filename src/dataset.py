@@ -50,7 +50,7 @@ class AerialDataset(torch.utils.data.Dataset):
         if needs_standardization:
             image_patch = image_patch / 255.0               
         
-        mask_patch = mask_to_one_hot(mask=mask_patch, n_classes=6, size=self.patch_size)
+        mask_patch = mask_to_one_hot(mask=mask_patch, n_classes=6)
                 
         image_patch = torch.from_numpy(image_patch).permute(2, 0, 1) # to shape [C, H, W]
         mask_patch = torch.from_numpy(mask_patch).permute(2, 0, 1)

@@ -9,7 +9,7 @@ class AerialModule(pl.LightningModule):
     def __init__(self, backbone, lr):
         super().__init__()
         self.backbone = backbone
-        self.loss_fn = torch.nn.CrossEntropyLoss()
+        self.loss_fn = torch.nn.CrossEntropyLoss() # weight=torch.tensor([1, 1, 1, 1, 1, 1])
         self.metric = torchmetrics.Dice(num_classes=6)
         # self.optimizer = optimizer
         # self.scheduler = scheduler

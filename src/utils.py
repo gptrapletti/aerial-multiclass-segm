@@ -141,38 +141,42 @@ def generate_random_non_overlapping_bboxs(n_bboxs, side, max_height, max_width):
         List of bounding boxes.
     '''
     bboxs = []
+    iter_counter = 0
     while len(bboxs) != n_bboxs:
-        bbox_i = get_random_bbox(side=side, max_height=max_height, max_width=max_width)
-        if len(bboxs) == 0:
-            bboxs.append(bbox_i)
-        else:
-            is_overlapping = False
-            bbox_i_polygon = Polygon(shapely_friendly_bbox(bbox_i))
-            for bbox in bboxs:
-                bbox_polygon = Polygon(shapely_friendly_bbox(bbox))
-                intersection = bbox_i_polygon.intersects(bbox_polygon)
-                if intersection:
-                    is_overlapping = True
-                    break
-            if not is_overlapping:
+        iter_counter += 1
+        if iter_counter <= 100: # to avoid it getting stuck searching for a bbox when there is no more space
+            bbox_i = get_random_bbox(side=side, max_height=max_height, max_width=max_width)
+            if len(bboxs) == 0:
                 bboxs.append(bbox_i)
-                
-    return bboxs   
+            else:
+                is_overlapping = False
+                bbox_i_polygon = Polygon(shapely_friendly_bbox(bbox_i))
+                for bbox in bboxs:
+                    bbox_polygon = Polygon(shapely_friendly_bbox(bbox))
+                    intersection = bbox_i_polygon.intersects(bbox_polygon)
+                    if intersection:
+                        is_overlapping = True
+                        break
+                if not is_overlapping:
+                    bboxs.append(bbox_i)
+        else:
+            break
+    
+    return bboxs
 
 
-def mask_to_one_hot(mask: np.ndarray, n_classes: int, size: int) -> np.ndarray:
+def mask_to_one_hot(mask: np.ndarray, n_classes: int) -> np.ndarray:
     '''Function to turn a patch mask with indexes (shape=[H, W]) to a
     one-hot encoded patch mask (shape=[H, W, C], where C is the number of classes).
     
     Args:
         mask: patch mask array.
         n_classes: number of classes.
-        size: size of the mask.
         
     Returns:
         one-hot encoded patch mask.
     '''
-    mask_hot = np.zeros(shape=(size, size, n_classes))
+    mask_hot = np.zeros(shape=(mask.shape[0], mask.shape[1], n_classes))
     for class_i in range(n_classes):
         mask_hot[..., class_i] = np.where(mask == class_i, 1, 0)
         

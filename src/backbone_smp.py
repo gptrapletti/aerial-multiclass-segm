@@ -9,5 +9,5 @@ unet_smp = smp.Unet(
     decoder_attention_type = None,
     in_channels = 3,
     classes = 6,
-    activation = 'softmax'
+    activation = None
 )
