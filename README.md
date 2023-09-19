@@ -38,9 +38,10 @@ Conclusion: the two methods have the same speed.
 - Write test dataset class as described above.
 
 # TODO
-- Complete CE weight test.
+- Refactor nb_02 on CE loss class (add it to `/practice`).
+- Starting from CE custom class, write custom loss class, as weighted focal loss.
+- Add dice loss for boundaries. 
 - Go full hydra.
-- Custom Loss: weighted loss (class other weight = 0) + dice loss for boundaries.
 - Try train with different lr.
 
 

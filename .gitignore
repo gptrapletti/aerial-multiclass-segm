@@ -10,6 +10,3 @@ mlruns/
 checkpoints/
 
 .env
-
-nb_01.ipynb
-nb_02.ipynb

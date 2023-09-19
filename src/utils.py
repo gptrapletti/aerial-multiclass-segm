@@ -128,7 +128,7 @@ def get_grid_bboxs(side: int, overlap: float, max_height: int, max_width: int) -
     return bboxs
 
 
-def generate_random_non_overlapping_bboxs(n_bboxs, side, max_height, max_width):
+def generate_random_non_overlapping_bboxs(n_bboxs, side, max_height, max_width, max_iter: 100):
     '''Generates random bounding boxes with no overlap.
     
     Args:
@@ -141,26 +141,23 @@ def generate_random_non_overlapping_bboxs(n_bboxs, side, max_height, max_width):
         List of bounding boxes.
     '''
     bboxs = []
-    iter_counter = 0
-    while len(bboxs) != n_bboxs:
+    iter_counter = 0 # to avoid it getting stuck searching for a bbox when there is no more space
+    while len(bboxs) != n_bboxs and iter_counter <= max_iter:
         iter_counter += 1
-        if iter_counter <= 100: # to avoid it getting stuck searching for a bbox when there is no more space
-            bbox_i = get_random_bbox(side=side, max_height=max_height, max_width=max_width)
-            if len(bboxs) == 0:
-                bboxs.append(bbox_i)
-            else:
-                is_overlapping = False
-                bbox_i_polygon = Polygon(shapely_friendly_bbox(bbox_i))
-                for bbox in bboxs:
-                    bbox_polygon = Polygon(shapely_friendly_bbox(bbox))
-                    intersection = bbox_i_polygon.intersects(bbox_polygon)
-                    if intersection:
-                        is_overlapping = True
-                        break
-                if not is_overlapping:
-                    bboxs.append(bbox_i)
+        bbox_i = get_random_bbox(side=side, max_height=max_height, max_width=max_width)
+        if len(bboxs) == 0:
+            bboxs.append(bbox_i)
         else:
-            break
+            is_overlapping = False
+            bbox_i_polygon = Polygon(shapely_friendly_bbox(bbox_i))
+            for bbox in bboxs:
+                bbox_polygon = Polygon(shapely_friendly_bbox(bbox))
+                intersection = bbox_i_polygon.intersects(bbox_polygon)
+                if intersection:
+                    is_overlapping = True
+                    break
+            if not is_overlapping:
+                bboxs.append(bbox_i)
     
     return bboxs
 
