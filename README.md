@@ -40,8 +40,9 @@ Conclusion: the two methods have the same speed.
 # TODO
 - Refactor nb_02 on CE loss class (add it to `/practice`).
 - Starting from CE custom class, write custom loss class, as weighted focal loss.
-- Add dice loss for boundaries. 
+- Add dice loss for boundaries.
 - Go full hydra.
+- Provare diverse loss (CE, focal, weighted focal, weight focal + dice) per vedere quale migliore. Prima però trovare LR migliore. Metric durante train e val è Dice generale, mentre in fase di test fare ritornare la Dice separatamente per classe.
 - Try train with different lr.
 
 
