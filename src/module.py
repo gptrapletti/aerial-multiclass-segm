@@ -4,12 +4,14 @@ from pytorch_lightning.utilities.types import STEP_OUTPUT
 import torch
 import torchmetrics
 from .utils import mask_to_labels
+from .losses import CrossEntropyLoss, FocalLoss
 
 class AerialModule(pl.LightningModule):
     def __init__(self, backbone, lr):
         super().__init__()
         self.backbone = backbone
-        self.loss_fn = torch.nn.CrossEntropyLoss() # weight=torch.tensor([1, 1, 1, 1, 1, 1])
+        # self.loss_fn = torch.nn.CrossEntropyLoss() # weight=torch.tensor([1, 1, 1, 1, 1, 1])
+        self.loss_fn = FocalLoss(gamma=2)
         self.metric = torchmetrics.Dice(num_classes=6)
         # self.optimizer = optimizer
         # self.scheduler = scheduler

@@ -22,7 +22,7 @@ test_split: 50 # 0.125%
 
 # Run
 experiment_name: 'aerial-multiclass-seg'
-run_description: 'patch-size:512_smp-activation:none-truly'
+run_description: 'try-focal-loss'
 
 # loss_fn:
 #   _target_: torch.nn.BCELoss

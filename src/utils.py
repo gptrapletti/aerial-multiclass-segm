@@ -128,7 +128,7 @@ def get_grid_bboxs(side: int, overlap: float, max_height: int, max_width: int) -
     return bboxs
 
 
-def generate_random_non_overlapping_bboxs(n_bboxs, side, max_height, max_width, max_iter: 100):
+def generate_random_non_overlapping_bboxs(n_bboxs, side, max_height, max_width, max_iter=100):
     '''Generates random bounding boxes with no overlap.
     
     Args:
