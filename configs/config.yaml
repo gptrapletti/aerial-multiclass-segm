@@ -1,0 +1,24 @@
+# @package _global_
+
+defaults:
+  - _self_
+  - datamodule: default
+  - backbone: unet_smp
+  - module: default
+  - loss: crossentropy_torch
+  - metric: dice_metric_torch
+  - logger: mlflow
+  - trainer: default
+
+core:
+  name: aerial-multiclass-segm # used as experiment name
+
+hydra:
+  run:
+    dir: logs/runs/${core.name}/${now:%Y-%m-%d_%H-%M-%S}
+  sweep:
+    dir: logs/multiruns/${core.name}/${now:%Y-%m-%d_%H-%M-%S}
+    # subdir: ${multirun_subdir_beautify:${hydra.job.override_dirname}}
+  job:
+    chdir: true # required to save checkpoint in the logs dir
+

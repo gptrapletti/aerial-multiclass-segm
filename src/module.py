@@ -7,12 +7,14 @@ from .utils import mask_to_labels
 from .losses import CrossEntropyLoss, FocalLoss
 
 class AerialModule(pl.LightningModule):
-    def __init__(self, backbone, lr):
+    def __init__(self, backbone, loss_fn, metric, lr):
         super().__init__()
         self.backbone = backbone
         # self.loss_fn = torch.nn.CrossEntropyLoss() # weight=torch.tensor([1, 1, 1, 1, 1, 1])
-        self.loss_fn = FocalLoss(gamma=2)
-        self.metric = torchmetrics.Dice(num_classes=6)
+        # self.loss_fn = FocalLoss(gamma=4)
+        # self.metric = torchmetrics.Dice(num_classes=6)
+        self.loss_fn = loss_fn
+        self.metric = metric
         # self.optimizer = optimizer
         # self.scheduler = scheduler
         self.lr = lr
@@ -43,6 +45,9 @@ class AerialModule(pl.LightningModule):
         preds = self(images)
         metric = self.metric(preds=preds, target=mask_to_labels(masks))
         self.log('test_metric', metric, prog_bar=True)
+        
+    def on_train_epoch_start(self):
+        return super().on_train_epoch_start()
         
     def configure_optimizers(self):
         optim = torch.optim.Adam(self.parameters(), lr=self.lr)

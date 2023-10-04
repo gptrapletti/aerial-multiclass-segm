@@ -1,0 +1,10 @@
+_target_: segmentation_models_pytorch.Unet
+encoder_name: resnet34
+encoder_depth: 5
+encoder_weights: null # imagenet
+decoder_use_batchnorm: True
+decoder_channels: [256, 128, 64, 32, 16]
+decoder_attention_type: null
+in_channels: 3
+classes: 6
+activation: null

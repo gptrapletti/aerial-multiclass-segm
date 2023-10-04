@@ -95,7 +95,8 @@ class TrainingDataset(AerialDataset):
                 n_bboxs = self.n_random_patches_per_image,
                 side = self.patch_size,
                 max_height= 2000,
-                max_width = 3000
+                max_width = 3000,
+                max_iter=5000
             )
 
             for bbox in bboxs:

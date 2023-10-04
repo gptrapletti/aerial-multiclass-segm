@@ -33,12 +33,16 @@ Conclusion: the two methods have the same speed.
 ## Hydra for configs
 `config.yaml` contains also classes to use to instantiate objects. In the training script, Hydra is used to read the yaml file and return the cfg dict, that contains the classes to use. Object are instantiated from those classes using `hydra.utils.instantiate()` and then passed to the LightningModule, DataModule, etc (see nb_01.ipynb).
 
+# NOTES TO ADD TO FINAL README
+- Use of Hydra to easily plug in and out diffent options (losses, etc.)
 
 # TODO-LONG-TERM
 - Write test dataset class as described above.
 - Train and val metric: unique Dice for all classes; metric for test: Dice divided by class.
 
 # TODO
+- Understand how put logs and mlruns in the same dir, rename run_name.
+- Check where the checkpoints are saved. Try to substitute the `get_callbacks` function with configs.
 - Add focal loss to practice.
 - Errors: txt desktop, val loss not found.
 - Understand how combine losses.
@@ -47,5 +51,7 @@ Conclusion: the two methods have the same speed.
 - Test losses
     - test each loss for N epochs.
     - CE, focal, weighted CE, weighted focal, the best of those combined with Dice loss.
+
+
 
 

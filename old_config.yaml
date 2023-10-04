@@ -3,12 +3,12 @@ data_path: data
 images_dir: data/images
 masks_dir: data/masks
 split_path: data/split.json
-n_random_patches_per_image: 8 # for patch = 512, max = 8
+n_random_patches_per_image: 6 # for patch = 512, max = 6
 patch_size: 512
 overlap: 0
 train_batch_size: 6 # for patch = 512, max = 6
 val_batch_size: 14
-num_workers: 12
+num_workers: 10
 
 # Model and training
 lr: 0.0001
@@ -22,7 +22,7 @@ test_split: 50 # 0.125%
 
 # Run
 experiment_name: 'aerial-multiclass-seg'
-run_description: 'try-focal-loss'
+run_description: 'focal-loss-gamma:4'
 
 # loss_fn:
 #   _target_: torch.nn.BCELoss

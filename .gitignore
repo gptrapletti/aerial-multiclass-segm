@@ -6,6 +6,7 @@ data/
 plots/
 __pycache__/
 lightning_logs/
+logs/
 mlruns/
 checkpoints/
 
