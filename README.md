@@ -41,12 +41,9 @@ Conclusion: the two methods have the same speed.
 - Train and val metric: unique Dice for all classes; metric for test: Dice divided by class.
 
 # TODO
-- Understand how put logs and mlruns in the same dir, rename run_name.
-- Check where the checkpoints are saved. Try to substitute the `get_callbacks` function with configs.
-- Add focal loss to practice.
-- Errors: txt desktop, val loss not found.
+
+- focal loss in practice: why focal loss with gamma=0 doesn't fall back to CE loss???
 - Understand how combine losses.
-- Go full hydra.
 - Find out best LR.
 - Test losses
     - test each loss for N epochs.

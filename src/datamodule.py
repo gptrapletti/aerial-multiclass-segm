@@ -43,8 +43,8 @@ class AerialDataModule(pl.LightningDataModule):
         self.val_transforms = val_transforms
         
     def prepare_data(self):
-        self.image_filepaths = sorted([os.path.join(self.data_path, 'images', filename) for filename in os.listdir(os.path.join(self.data_path, 'images'))])
-        self.mask_filepaths = sorted([os.path.join(self.data_path, 'masks', filename) for filename in os.listdir(os.path.join(self.data_path, 'masks'))])
+        self.image_filepaths = sorted([os.path.join(self.data_path, 'images', filename) for filename in os.listdir(os.path.join(self.data_path, 'images'))])[:10] ### ! remove
+        self.mask_filepaths = sorted([os.path.join(self.data_path, 'masks', filename) for filename in os.listdir(os.path.join(self.data_path, 'masks'))])[:10] ### ! remove
         self.train_idxs = [int(x) for x in self.split['train']]
         self.val_idxs = [int(x) for x in self.split['val']]
         self.test_idxs = [int(x) for x in self.split['test']]

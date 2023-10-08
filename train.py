@@ -1,17 +1,17 @@
 import os
 import hydra
 import torch
+from omegaconf import OmegaConf
 from dotenv import load_dotenv
-from src.callbacks import get_callbacks
+from src.callbacks import instantiate_callbacks
 
 load_dotenv()
 
 @hydra.main(version_base=None, config_path='configs', config_name='config.yaml')
 def main(cfg):
+              
+    print(OmegaConf.to_yaml(cfg))
     
-    for k, v in cfg.items():
-        print(f'{k}\n\t{v}\n\n')
-        
     torch.set_float32_matmul_precision('medium')
     
     datamodule = hydra.utils.instantiate(cfg.datamodule)
@@ -19,8 +19,8 @@ def main(cfg):
     module = hydra.utils.instantiate(cfg.module)
     
     logger = hydra.utils.instantiate(cfg.logger)
-    
-    callbacks = get_callbacks(ckp_dst_path=os.path.join('mlruns', logger.experiment_id, logger.run_id, 'checkpoints'))
+      
+    callbacks = instantiate_callbacks(cfg.callbacks)
     
     trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger)
     
@@ -28,3 +28,5 @@ def main(cfg):
 
 if __name__ == '__main__':
     main()
+    
+    

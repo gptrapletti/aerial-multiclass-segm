@@ -1,25 +1,20 @@
-import os
-import pytorch_lightning as pl
-from typing import List
+import hydra
 
-def get_callbacks(ckp_dst_path: str) -> List[pl.Callback]:
-    '''Returns a list of callbacks.
+def instantiate_callbacks(callbacks_cfg):
+    """
+    Takes cfg's callbacks configuration dictionary, where
+    keys are callbacks name and values are their configs, and
+    instantiates every callback, appending it to a list.
 
     Args:
-        ckp_dst_path: path to the directory where checkpoints will be saved.
+        callbacks_cfg: Hydra callbacks config dictionary.
 
     Returns:
         List of callbacks.
-    '''
-    callbacks = [
-        pl.callbacks.ModelCheckpoint(
-            dirpath = ckp_dst_path,
-            filename = '{epoch}',
-            monitor = 'val_loss',
-            mode = 'min',
-            save_top_k = 1,
-        ),
-        pl.callbacks.LearningRateMonitor(logging_interval='epoch')
-    ]
-    
+    """
+    callbacks = []
+
+    for callback_name in callbacks_cfg: 
+        callbacks.append(hydra.utils.instantiate(callbacks_cfg[callback_name]))
+
     return callbacks

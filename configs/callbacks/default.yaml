@@ -1,0 +1,11 @@
+model_checkpoint:
+  _target_: pytorch_lightning.callbacks.ModelCheckpoint
+  dirpath: checkpoints
+  filename: '{epoch}'
+  monitor: val_loss
+  mode: min
+  save_top_k: 1
+
+lr_monitor:
+  _target_: pytorch_lightning.callbacks.LearningRateMonitor
+  logging_interval: epoch

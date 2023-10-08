@@ -8,17 +8,19 @@ defaults:
   - loss: crossentropy_torch
   - metric: dice_metric_torch
   - logger: mlflow
+  - callbacks: default
   - trainer: default
 
 core:
-  name: aerial-multiclass-segm # used as experiment name
+  name: aerial-multiclass-segm # experiment name
+
+run_name: ${now:%Y-%m-%d_%H-%M-%S}_default
 
 hydra:
   run:
-    dir: logs/runs/${core.name}/${now:%Y-%m-%d_%H-%M-%S}
+    dir: logs/hydra/${core.name}/${run_name}
   sweep:
-    dir: logs/multiruns/${core.name}/${now:%Y-%m-%d_%H-%M-%S}
-    # subdir: ${multirun_subdir_beautify:${hydra.job.override_dirname}}
+    dir: logs/hydra/${core.name}/${run_name}
   job:
     chdir: true # required to save checkpoint in the logs dir
 
