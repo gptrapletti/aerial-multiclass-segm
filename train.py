@@ -14,16 +14,11 @@ def main(cfg):
     
     torch.set_float32_matmul_precision('medium')
     
-    datamodule = hydra.utils.instantiate(cfg.datamodule)
-    
-    module = hydra.utils.instantiate(cfg.module)
-    
-    logger = hydra.utils.instantiate(cfg.logger)
-      
-    callbacks = instantiate_callbacks(cfg.callbacks)
-    
-    trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger)
-    
+    datamodule = hydra.utils.instantiate(cfg.datamodule)    
+    module = hydra.utils.instantiate(cfg.module)    
+    logger = hydra.utils.instantiate(cfg.logger)      
+    callbacks = instantiate_callbacks(cfg.callbacks)    
+    trainer = hydra.utils.instantiate(cfg.trainer, callbacks=callbacks, logger=logger)    
     trainer.fit(model=module, datamodule=datamodule)
 
 if __name__ == '__main__':
