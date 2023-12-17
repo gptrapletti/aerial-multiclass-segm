@@ -9,8 +9,11 @@ lightning_logs/
 logs/
 mlruns/
 checkpoints/
+*.egg-info/
 
 .env
+
+temp*
 
 notebooks/nb_01.ipynb
 notebooks/nb_02.ipynb

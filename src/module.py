@@ -3,8 +3,8 @@ import pytorch_lightning as pl
 from pytorch_lightning.utilities.types import STEP_OUTPUT
 import torch
 import torchmetrics
-from .utils import mask_to_labels
-from .losses import CrossEntropyLoss, FocalLoss
+from src.processing_utils import mask_to_labels
+from src.losses import CrossEntropyLoss, FocalLoss
 
 class AerialModule(pl.LightningModule):
     def __init__(self, backbone, loss_fn, metric, lr):

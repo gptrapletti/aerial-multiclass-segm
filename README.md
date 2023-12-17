@@ -36,6 +36,7 @@ Various training experiments were conducted, initially focusing on evaluating di
 
 ## To-Do List
 
+- [ ] Try LearningRateFinder callback.
 - [ ] Try training loss: combinantion of Focal Loss and Dice. Can also add class weights.
 - [ ] Implement train and val metric as unique Dice for all classes; for test: return Dice per class + Dice for all classes.
 - [ ] Launch experiments with different learning rates.

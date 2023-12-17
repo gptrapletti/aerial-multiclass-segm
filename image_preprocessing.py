@@ -4,7 +4,7 @@ import os
 import cv2
 import yaml
 from tqdm import tqdm
-from src.utils import create_filename
+from src.processing_utils import create_filename
 
 with open('config.yaml', 'r') as f:
     cfg = yaml.safe_load(f)

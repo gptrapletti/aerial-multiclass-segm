@@ -5,7 +5,7 @@ import numpy as np
 import yaml
 from PIL import Image
 import albumentations as A
-from .utils import generate_random_non_overlapping_bboxs, get_grid_bboxs, mask_to_one_hot
+from src.processing_utils import generate_random_non_overlapping_bboxs, get_grid_bboxs, mask_to_one_hot
 
 class AerialDataset(torch.utils.data.Dataset):
     '''Generic dataset class'''

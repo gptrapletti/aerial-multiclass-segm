@@ -2,7 +2,7 @@
 
 import os
 import numpy as np
-from src.utils import from_png_to_semantic_mask, create_filename
+from src.processing_utils import from_png_to_semantic_mask, create_filename
 import cv2
 from tqdm import tqdm
 from multiprocessing import Pool

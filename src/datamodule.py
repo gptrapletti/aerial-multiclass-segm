@@ -4,8 +4,8 @@ import os
 import json
 from typing import Optional, List
 import albumentations as A
-from .dataset import TrainingDataset, ValidationDataset
-from .sampler import AerialSampler
+from src.dataset import TrainingDataset, ValidationDataset
+from src.sampler import AerialSampler
 
 class AerialDataModule(pl.LightningDataModule):
     '''Datamodule class for aerial multiclass segmentation.
