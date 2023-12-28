@@ -3,9 +3,9 @@
 defaults:
   - _self_
   - datamodule: default
-  - backbone: unet_smp
+  - backbone: unet_monai # unet_smp
   - module: default
-  - loss: crossentropy_torch
+  - loss: crossentropy_torch # focal_dice
   - metric: dice_metric_torch
   - logger: mlflow
   - callbacks: default

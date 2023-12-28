@@ -1,0 +1,13 @@
+_target_: monai.networks.nets.UNet
+spatial_dims: 2
+in_channels: 3
+out_channels: 6
+channels: [256, 128, 64, 32, 16]
+strides: [2, 2, 2, 2]
+kernel_size: 3
+up_kernel_size: 3
+num_res_units: 0
+act: RELU 
+norm: BATCH
+dropout: 0.5
+bias: True

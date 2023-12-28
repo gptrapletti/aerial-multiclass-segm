@@ -4,6 +4,6 @@ split_path: ${oc.env:HOME}/ds/aerial-multiclass-segm/data/split.json
 n_random_patches_per_image: 6 # for patch = 512, max = 6
 patch_size: 512
 train_batch_size: 6 # for patch = 512, max = 6
-val_batch_size: 14
+val_batch_size: 12
 num_workers: 10
 overlap: 0

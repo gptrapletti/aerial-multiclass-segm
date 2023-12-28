@@ -36,11 +36,11 @@ Various training experiments were conducted, initially focusing on evaluating di
 
 ## To-Do List
 
-- [ ] Try LearningRateFinder callback.
 - [ ] Try training loss: combinantion of Focal Loss and Dice. Can also add class weights.
 - [ ] Implement train and val metric as unique Dice for all classes; for test: return Dice per class + Dice for all classes.
 - [ ] Launch experiments with different learning rates.
 - [ ] Write test dataset class.
+- [ ] If segmentation results are not good along the edges, implement a loss that penalizes when the model is approximative there.
 - [ ] Write custom architecture. Can add attention mechanisms too.
 - [ ] Consider whether to weight more the "other" class in the loss computation, since it encompasses a large variety of different kinds of objects.
 

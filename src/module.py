@@ -18,6 +18,7 @@ class AerialModule(pl.LightningModule):
         # self.optimizer = optimizer
         # self.scheduler = scheduler
         self.lr = lr
+        self.save_hyperparameters()
     
     def forward(self, x):
         x = self.backbone(x)

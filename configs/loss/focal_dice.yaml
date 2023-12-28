@@ -1,0 +1,7 @@
+_target_: src.losses.AerialLoss
+loss_fn1:
+  _target_: src.losses.FocalLoss
+  gamma: 3
+loss_fn2:
+  _target_: src.losses.DiceLoss
+loss_weights: [1, 1]
