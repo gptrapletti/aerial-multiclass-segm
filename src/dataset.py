@@ -58,7 +58,7 @@ class AerialDataset(torch.utils.data.Dataset):
         image_patch = image_patch.type(torch.float32)
         mask_patch = mask_patch.type(torch.float32) # or torch.uint8?
         
-        return image_patch, mask_patch
+        return image_patch, mask_patch, (filename, bbox)
     
     
 class TrainingDataset(AerialDataset):

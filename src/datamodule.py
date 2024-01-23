@@ -75,7 +75,16 @@ class AerialDataModule(pl.LightningDataModule):
         if stage == 'test':
             test_image_filepaths = [self.image_filepaths[i] for i in range(len(self.image_filepaths)) if i+1 in self.test_idxs]
             test_mask_filepaths = [self.mask_filepaths[i] for i in range(len(self.mask_filepaths)) if i+1 in self.test_idxs]
-            pass           
+            val_image_filepaths = [self.image_filepaths[i] for i in range(len(self.image_filepaths)) if i+1 in self.val_idxs]
+            val_mask_filepaths = [self.mask_filepaths[i] for i in range(len(self.mask_filepaths)) if i+1 in self.val_idxs]
+            self.val_dataset = ValidationDataset(
+                image_filepaths = val_image_filepaths,
+                mask_filepaths = val_mask_filepaths,
+                patch_size = self.patch_size,
+                overlap = self.overlap,
+                transforms = self.val_transforms
+            )   
+            # TODO: do not use validation stuff here   
     
     def train_dataloader(self):
         sampler = AerialSampler(self.train_dataset)
@@ -85,8 +94,8 @@ class AerialDataModule(pl.LightningDataModule):
         return DataLoader(dataset=self.val_dataset, batch_size=self.val_batch_size, shuffle=False, num_workers=self.num_workers)
     
     def test_dataloader(self):
-        pass
-    
+        return DataLoader(dataset=self.val_dataset, batch_size=self.val_batch_size, shuffle=False, num_workers=self.num_workers) # TODO: fix for not using here the val dataset
+   
     
 if __name__ == '__main__':
     import yaml

@@ -223,6 +223,38 @@ def color_code_mask(mask):
         
     return mask
 
+import torch
+
+def color_code_mask2(mask):
+    '''To turn a mask as a torch tensor with shape [H, W, 3] with category IDs (1, 2, 3, etc)
+    to a color coded mask for visualization using PyTorch.
+
+    Args:
+        mask (torch.Tensor): mask with category IDs.
+        
+    Return:
+        torch.Tensor: color coded mask [H, W, 3].
+    '''
+    color_mapping = {
+        0: torch.tensor([0, 0, 0]), # other
+        1: torch.tensor([125, 125, 125]), # ground
+        2: torch.tensor([0, 255, 0]), # vegetation
+        3: torch.tensor([90, 60, 0]), # buildings
+        4: torch.tensor([0, 0, 255]), # water
+        5: torch.tensor([255, 0, 0]) # people
+    }
+
+    colored_mask = torch.zeros_like(mask)
+
+    for color_id, color in color_mapping.items():
+        filter = (mask == color_id)
+        colored_mask[filter] = color
+
+    return colored_mask
+
+
+
+
 if __name__ == '__main__':
     
     import os
