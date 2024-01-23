@@ -4,4 +4,5 @@ loss_fn1:
   gamma: 3
 loss_fn2:
   _target_: src.losses.DiceLoss
+  class_weights: [0.1, 1, 1, 1, 1, 5]
 loss_weights: [1, 1]

@@ -1,2 +1,3 @@
 _target_: torchmetrics.Dice
 num_classes: 6
+ignore_index: 0

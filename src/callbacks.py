@@ -1,4 +1,6 @@
 import hydra
+from numpy import log
+from pytorch_lightning.callbacks import Callback
 
 def instantiate_callbacks(callbacks_cfg):
     """
@@ -18,3 +20,26 @@ def instantiate_callbacks(callbacks_cfg):
         callbacks.append(hydra.utils.instantiate(callbacks_cfg[callback_name]))
 
     return callbacks
+
+
+class LogGradNormCallback(Callback):
+    """
+    Logs the gradient log norm.
+    Source: https://github.com/Lightning-AI/pytorch-lightning/issues/1462
+    """
+
+    def on_after_backward(self, trainer, model):
+        model.log("grad_norm", self.log_gradient_norm(model))
+
+    def log_gradient_norm(self, model):
+        total_norm = 0.0
+        for p in model.parameters():
+            if p.grad is not None:
+                # Compute norm (a scalar) of parameter tensor
+                param_norm = p.grad.detach().data.norm(2)
+                # Square it according to L2 norm formula, then add
+                total_norm += param_norm.item() ** 2
+
+        total_norm = total_norm ** 0.5
+        log_grad_norm = log(total_norm + 1e-6)
+        return log_grad_norm

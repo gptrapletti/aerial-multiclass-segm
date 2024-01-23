@@ -98,7 +98,7 @@ class DiceLoss(BaseLoss):
         objects, the channel weight is 0, otherwise 1). Also add class weights, if present.'''
         weights = (torch.sum(target != 0, axis=[2, 3]) != 0).type(torch.float32) # [B, C]
         if self.class_weights:
-            weights = weights * torch.tensor(self.class_weights) # [B, C]        
+            weights = weights * torch.tensor(self.class_weights).to('cuda:0') # [B, C]        
         return weights        
         
 

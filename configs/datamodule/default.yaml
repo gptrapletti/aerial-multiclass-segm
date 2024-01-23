@@ -1,9 +1,19 @@
 _target_: src.datamodule.AerialDataModule
 data_path: ${oc.env:HOME}/ds/aerial-multiclass-segm/data
 split_path: ${oc.env:HOME}/ds/aerial-multiclass-segm/data/split.json
-n_random_patches_per_image: 6 # for patch = 512, max = 6
-patch_size: 512
-train_batch_size: 6 # for patch = 512, max = 6
-val_batch_size: 12
+n_random_patches_per_image: 16
+patch_size: 256
+train_batch_size: 12
+val_batch_size: 32
 num_workers: 10
 overlap: 0
+
+# patch_size: 512
+# n_random_patches_per_image: 6
+# train_batch_size: 6
+# val_batch_size: 12
+
+# patch_size: 256
+# n_random_patches_per_image: 24
+# train_batch_size: 24
+# val_batch_size: 24

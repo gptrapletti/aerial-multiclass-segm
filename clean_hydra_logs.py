@@ -20,7 +20,11 @@ for run_id in run_ids:
         with open(run_name_filepath, 'r') as f:
             run_name = f.read()
             run_names.append(run_name)
-            
+
+n_removed = 0            
 for run_name in os.listdir(hydra_log_path):
     if run_name not in run_names:
         shutil.rmtree(os.path.join(hydra_log_path, run_name))
+        n_removed += 1
+        
+print(f'Completed. {n_removed} runs removed.')

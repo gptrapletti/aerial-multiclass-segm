@@ -198,6 +198,31 @@ def mask_to_labels (masks: torch.Tensor) -> torch.Tensor:
     return index_masks.type(torch.uint8)
 
 
+def color_code_mask(mask):
+    '''To turn a mask as a np.array with shape [H, W, 3] with category IDs (1, 2, 3, etc)
+    to a color coded mask for visualization.
+    
+    Args:
+        mask (np.array): mask with category IDs.
+        
+    Return:
+        np.array: color coded mask [H, W, 3].
+    '''
+    color_mapping = {
+        0: (0, 0, 0), # other
+        1: (125, 125, 125), # ground
+        2: (0, 255, 0), # vegetation
+        3: (90, 60, 0), # buildings
+        4: (0, 0, 255), # water
+        5: (255, 0, 0) # people
+    }
+    
+    for color_id in color_mapping:
+        filter = np.all(mask == (color_id, color_id, color_id), axis=2)
+        mask[filter] = color_mapping[color_id]
+        
+    return mask
+
 if __name__ == '__main__':
     
     import os
