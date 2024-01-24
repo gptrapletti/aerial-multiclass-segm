@@ -198,7 +198,7 @@ def mask_to_labels (masks: torch.Tensor) -> torch.Tensor:
     return index_masks.type(torch.uint8)
 
 
-def color_code_mask(mask):
+def color_code_mask1(mask):
     '''To turn a mask as a np.array with shape [H, W, 3] with category IDs (1, 2, 3, etc)
     to a color coded mask for visualization.
     
@@ -223,7 +223,6 @@ def color_code_mask(mask):
         
     return mask
 
-import torch
 
 def color_code_mask2(mask):
     '''To turn a mask as a torch tensor with shape [H, W, 3] with category IDs (1, 2, 3, etc)
@@ -236,23 +235,29 @@ def color_code_mask2(mask):
         torch.Tensor: color coded mask [H, W, 3].
     '''
     color_mapping = {
-        0: torch.tensor([0, 0, 0]), # other
-        1: torch.tensor([125, 125, 125]), # ground
-        2: torch.tensor([0, 255, 0]), # vegetation
-        3: torch.tensor([90, 60, 0]), # buildings
-        4: torch.tensor([0, 0, 255]), # water
-        5: torch.tensor([255, 0, 0]) # people
+        0: [0, 0, 0], # other
+        1: [125, 125, 125], # ground
+        2: [0, 255, 0], # vegetation
+        3: [90, 60, 0], # buildings
+        4: [0, 0, 255], # water
+        5: [255, 0, 0] # people
     }
-
-    colored_mask = torch.zeros_like(mask)
-
+    mask_arr = mask.detach().cpu().numpy()
+    colored_mask = np.zeros_like(mask_arr)
+    
     for color_id, color in color_mapping.items():
-        filter = (mask == color_id)
+        filter = np.all(mask_arr == (color_id, color_id, color_id), axis=2)
         colored_mask[filter] = color
 
-    return colored_mask
+    return torch.tensor(colored_mask)
 
 
+def aerial_collate_fn(batch):
+    images, masks, metadata = zip(*batch) # batch = [(image1, mask1, metadata1), (image2, mask2, metadata2), ...]
+    images = torch.stack(images, dim=0)
+    masks = torch.stack(masks, dim=0)
+    
+    return images, masks, metadata
 
 
 if __name__ == '__main__':

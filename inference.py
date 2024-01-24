@@ -3,6 +3,7 @@ import hydra
 import torch
 from omegaconf import OmegaConf
 from dotenv import load_dotenv
+from src.module import AerialModule
 from src.callbacks import instantiate_callbacks
 
 load_dotenv()
@@ -17,8 +18,9 @@ def main(cfg):
     print('\nInstantiate datamodule')
     datamodule = hydra.utils.instantiate(cfg.datamodule)
     
-    print('\nInstantiate model')   
-    module = hydra.utils.instantiate(cfg.module)
+    print('\nLoad model checkpoint')   
+    module = AerialModule.load_from_checkpoint(cfg.best_ckp_path)
+    module = module.eval()
     
     print('\nInstantiate trainer')    
     logger = hydra.utils.instantiate(cfg.logger)      

@@ -6,6 +6,7 @@ from typing import Optional, List
 import albumentations as A
 from src.dataset import TrainingDataset, ValidationDataset
 from src.sampler import AerialSampler
+from src.processing_utils import aerial_collate_fn
 
 class AerialDataModule(pl.LightningDataModule):
     '''Datamodule class for aerial multiclass segmentation.
@@ -88,13 +89,32 @@ class AerialDataModule(pl.LightningDataModule):
     
     def train_dataloader(self):
         sampler = AerialSampler(self.train_dataset)
-        return DataLoader(dataset=self.train_dataset, batch_size=self.train_batch_size, shuffle=False, sampler=sampler, num_workers=self.num_workers)
+        return DataLoader(
+            dataset=self.train_dataset, 
+            batch_size=self.train_batch_size,
+            collate_fn=aerial_collate_fn, 
+            shuffle=False, 
+            sampler=sampler, 
+            num_workers=self.num_workers
+        )
     
     def val_dataloader(self):
-        return DataLoader(dataset=self.val_dataset, batch_size=self.val_batch_size, shuffle=False, num_workers=self.num_workers)
+        return DataLoader(
+            dataset=self.val_dataset, 
+            batch_size=self.val_batch_size,
+            collate_fn=aerial_collate_fn,
+            shuffle=False, 
+            num_workers=self.num_workers
+        )
     
-    def test_dataloader(self):
-        return DataLoader(dataset=self.val_dataset, batch_size=self.val_batch_size, shuffle=False, num_workers=self.num_workers) # TODO: fix for not using here the val dataset
+    def test_dataloader(self): # TODO: fix for not using here the val dataset
+        return DataLoader(
+            dataset=self.val_dataset, 
+            batch_size=self.val_batch_size,
+            collate_fn=aerial_collate_fn,
+            shuffle=False, 
+            num_workers=self.num_workers
+        ) 
    
     
 if __name__ == '__main__':

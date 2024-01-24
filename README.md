@@ -36,7 +36,7 @@ Various training experiments were conducted, initially focusing on evaluating di
 
 ## To-Do List
 
-- [ ] Create a custome collate_fn for Dataloader so that it returns a tuple as third element, for stitch_patches.
+- [ ] Beautify test_step (remove TODOs, etc.), implement saving plots for comparison prediction vs GT (maybe a PDF?).
 - [ ] Try inference on patches with best model.
 - [ ] Implement train and val metric as unique Dice for all classes; for test: return Dice per class + Dice for all classes.
 - [ ] Write test dataset class.

@@ -24,3 +24,6 @@ hydra:
   job:
     chdir: true # required to save checkpoint in the logs dir
 
+best_ckp_path: '/home/gptrapletti/ds/aerial-multiclass-segm/logs/hydra/aerial-multiclass-segm/2023-12-30_18-44-06_patch:256_loss:dice_backbone:default/checkpoints/epoch=31.ckpt'
+
+
