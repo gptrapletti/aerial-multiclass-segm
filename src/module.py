@@ -3,18 +3,19 @@ import torch
 import numpy as np
 import cv2
 import os
-from src.processing_utils import mask_to_labels, color_code_mask1, color_code_mask2
+from src.processing_utils import mask_to_labels, color_code_pred_mask
 
 class AerialModule(pl.LightningModule):
-    def __init__(self, backbone, loss_fn, metric, lr):
+    def __init__(self, backbone, loss_fn, metric, lr, output_path):
         super().__init__()
         self.backbone = backbone
         self.loss_fn = loss_fn
         self.metric = metric
         self.lr = lr
+        self.output_path = output_path
         self.activation_function = torch.nn.Softmax(dim=1)
         self.current_image_filename = None
-        self.current_image = np.zeros(shape=(2000, 3000, 3))
+        self.current_image = np.zeros(shape=(2000, 3000, 6))
         self.save_hyperparameters()
         # self.save_hyperparameters(ignore=['backbone', 'loss_fn', 'metric'])
         # 'save_hyperparameters(): when loading from checkpoint, a Warning is raised saying that
@@ -50,47 +51,43 @@ class AerialModule(pl.LightningModule):
         
     def test_step(self, batch, batch_idx):
         images, masks, batch_patch_bboxs = batch
-        logits = self(images) # [batch_size, 6, patch_size, patch_size]
-        probs = self.activation_function(logits) # [batch_size, 6, patch_size, patch_size]
+        logits = self(images) # [B, 6, S, S], S = patch side
+        probs = self.activation_function(logits) # [B, 6, S, S]
         metric = self.metric(preds=probs, target=mask_to_labels(masks))
         self.log('test_metric', metric, prog_bar=True, batch_size=images.shape[0])
         
         probs = probs.detach().cpu()
-        preds = torch.argmax(probs, dim=1) # [batch_size, patch_size, patch_size], single channel images with category IDs
+        preds = torch.argmax(probs, dim=1) # [B, S, S], single channel images with category IDs
+        preds = torch.nn.functional.one_hot(preds, num_classes=6) # [B, S, S, 6], 6 channels, with 1 for category with higher prediction
+                      
+        self.stitch_patches_and_save(preds, batch_patch_bboxs)
+            
+    def stitch_patches_and_save(self, preds, batch_patch_bboxs):
         # Set current image
         if self.current_image_filename is None:
-            self.current_image_filename = batch_patch_bboxs[0][0]
-                       
-        self.stitch_patches(preds, batch_patch_bboxs)
-            
-    def stitch_patches(self, preds, batch_patch_bboxs): 
+            self.current_image_filename = batch_patch_bboxs[0][0]        
+        
         for j, (pred_patch, patch_bbox) in enumerate(zip(preds, batch_patch_bboxs)):
+            # pred_patch shape = [S, S, 6]
             image_filename, bbox = patch_bbox
-            # To 3 channels (needed for viz)
-            pred_patch = torch.concat((pred_patch.unsqueeze(-1), pred_patch.unsqueeze(-1), pred_patch.unsqueeze(-1)), axis=-1) # [patch_size, patch_size, 3]
-            # To category IDs
-            color_coded_patch = color_code_mask1(pred_patch.numpy()) # [patch_size, patch_size, 3]
-            # cv2.imwrite( # TODO: remove
-            #     filename='/home/gptrapletti/ds/aerial-multiclass-segm/temp.jpg', 
-            #     img=color_coded_patch.astype(np.uint8)
-            # )
-            
+                      
             if image_filename == self.current_image_filename:
                 # Stitch patch into current image
-                self.current_image[bbox[0][0]:bbox[1][0], bbox[0][1]:bbox[1][1], :] = color_coded_patch
+                self.current_image[bbox[0][0]:bbox[1][0], bbox[0][1]:bbox[1][1], :] = pred_patch
             else:
                 # A patch from a new image arrived, so the previous image is complete and can be saved.
-                current_image_for_viz = self.current_image.astype(np.uint8)
+                current_image_for_viz = color_code_pred_mask(self.current_image)
                 current_image_for_viz = cv2.cvtColor(current_image_for_viz, cv2.COLOR_RGB2BGR)
-                # print(10*'\t', type(current_image_for_viz), current_image_for_viz.shape, current_image_filename)
-                output_filepath = os.path.join('/home/gptrapletti/ds/aerial-multiclass-segm/temp', self.current_image_filename + '.jpg')
-                # print(output_filepath)
-                cv2.imwrite(filename=output_filepath, img=current_image_for_viz) # TODO: fix this dir         
+                predicted_masks_output_dirpath = os.path.join(self.output_path, 'inference', 'predicted_masks')
+                if not os.path.exists(predicted_masks_output_dirpath):
+                    os.makedirs(predicted_masks_output_dirpath)
+                output_filepath = os.path.join(predicted_masks_output_dirpath, self.current_image_filename + '.jpg')
+                cv2.imwrite(filename=output_filepath, img=current_image_for_viz)     
                 # Init new current image
                 self.current_image_filename = image_filename
-                self.current_image = np.zeros(shape=(2000, 3000, 3))
+                self.current_image = np.zeros(shape=(2000, 3000, 6))
                 # Add the new patch
-                self.current_image[bbox[0][0]:bbox[1][0], bbox[0][1]:bbox[1][1], :] = color_coded_patch
+                self.current_image[bbox[0][0]:bbox[1][0], bbox[0][1]:bbox[1][1], :] = pred_patch
         
     def on_train_epoch_start(self): # NOTE: why did I add this? Maybe for the AerialSampler?
         return super().on_train_epoch_start()

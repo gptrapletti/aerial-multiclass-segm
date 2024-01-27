@@ -19,7 +19,7 @@ def main(cfg):
     datamodule = hydra.utils.instantiate(cfg.datamodule)
     
     print('\nLoad model checkpoint')   
-    module = AerialModule.load_from_checkpoint(cfg.best_ckp_path)
+    module = AerialModule.load_from_checkpoint(cfg.best_ckp_path, output_path=cfg.output_path) # TODO: output_path should be removed when I'll have a new checkpoint with also the module's output_path parameter saved in it
     module = module.eval()
     
     print('\nInstantiate trainer')    

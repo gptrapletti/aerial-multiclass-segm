@@ -198,42 +198,9 @@ def mask_to_labels (masks: torch.Tensor) -> torch.Tensor:
     return index_masks.type(torch.uint8)
 
 
-def color_code_mask1(mask):
-    '''To turn a mask as a np.array with shape [H, W, 3] with category IDs (1, 2, 3, etc)
-    to a color coded mask for visualization.
-    
-    Args:
-        mask (np.array): mask with category IDs.
-        
-    Return:
-        np.array: color coded mask [H, W, 3].
-    '''
-    color_mapping = {
-        0: (0, 0, 0), # other
-        1: (125, 125, 125), # ground
-        2: (0, 255, 0), # vegetation
-        3: (90, 60, 0), # buildings
-        4: (0, 0, 255), # water
-        5: (255, 0, 0) # people
-    }
-    
-    for color_id in color_mapping:
-        filter = np.all(mask == (color_id, color_id, color_id), axis=2)
-        mask[filter] = color_mapping[color_id]
-        
-    return mask
-
-
-def color_code_mask2(mask):
-    '''To turn a mask as a torch tensor with shape [H, W, 3] with category IDs (1, 2, 3, etc)
-    to a color coded mask for visualization using PyTorch.
-
-    Args:
-        mask (torch.Tensor): mask with category IDs.
-        
-    Return:
-        torch.Tensor: color coded mask [H, W, 3].
-    '''
+def color_code_pred_mask(array):
+    '''Turn a numpy array with shape [H, W, C], representing the binary prediction along the category
+    channels, into a numpy array with shape [H, W, 3], where the predicted category is colored coded. '''
     color_mapping = {
         0: [0, 0, 0], # other
         1: [125, 125, 125], # ground
@@ -242,14 +209,12 @@ def color_code_mask2(mask):
         4: [0, 0, 255], # water
         5: [255, 0, 0] # people
     }
-    mask_arr = mask.detach().cpu().numpy()
-    colored_mask = np.zeros_like(mask_arr)
-    
-    for color_id, color in color_mapping.items():
-        filter = np.all(mask_arr == (color_id, color_id, color_id), axis=2)
-        colored_mask[filter] = color
-
-    return torch.tensor(colored_mask)
+    array_as_category_ids = np.argmax(array, axis=2)    
+    rgb_array = np.zeros((array.shape[0], array.shape[1], 3))    
+    for category_id, category_color in color_mapping.items():
+        rgb_array[array_as_category_ids == category_id] = category_color
+        
+    return rgb_array.astype(np.uint8)
 
 
 def aerial_collate_fn(batch):

@@ -9,6 +9,7 @@ lightning_logs/
 logs/
 mlruns/
 checkpoints/
+output/
 *.egg-info/
 
 .env

@@ -36,8 +36,8 @@ Various training experiments were conducted, initially focusing on evaluating di
 
 ## To-Do List
 
-- [ ] Beautify test_step (remove TODOs, etc.), implement saving plots for comparison prediction vs GT (maybe a PDF?).
-- [ ] Try inference on patches with best model.
+- [ ] Implement saving plots for comparison prediction vs GT (maybe a PDF?).
+- [ ] Compute metric on whole images.
 - [ ] Implement train and val metric as unique Dice for all classes; for test: return Dice per class + Dice for all classes.
 - [ ] Write test dataset class.
 - [ ] Improve out losses weights are sent to GPU (internally, see loss classes).
