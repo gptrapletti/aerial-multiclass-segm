@@ -217,7 +217,24 @@ def color_code_pred_mask(array):
     return rgb_array.astype(np.uint8)
 
 
+def color_code_gt_mask(mask):
+    color_mapping = {
+        0: [0, 0, 0], # other
+        1: [125, 125, 125], # ground
+        2: [0, 255, 0], # vegetation
+        3: [90, 60, 0], # buildings
+        4: [0, 0, 255], # water
+        5: [255, 0, 0] # people
+    } 
+    rgb_mask = np.zeros(shape=(mask.shape[0], mask.shape[1], 3))
+    for category_id, category_color in color_mapping.items():
+        rgb_mask[mask == category_id] = category_color
+        
+    return rgb_mask.astype(np.uint8)
+
+
 def aerial_collate_fn(batch):
+    '''To return patch bboxs as tuples and not as tensors, required for whole photo reconstruction.'''
     images, masks, metadata = zip(*batch) # batch = [(image1, mask1, metadata1), (image2, mask2, metadata2), ...]
     images = torch.stack(images, dim=0)
     masks = torch.stack(masks, dim=0)

@@ -35,14 +35,23 @@ The model utilizes a U-Net architecture from the `segmentation_models_pytorch` l
 Various training experiments were conducted, initially focusing on evaluating different loss functions—specifically CrossEntropy and Dice—over a fixed number of epochs. The training process and its outcomes are meticulously logged using MLFlow for comprehensive tracking and analysis. These experiments were performed using an NVIDIA GeForce RTX 3050 GPU.
 
 ## To-Do List
-
-- [ ] Implement saving plots for comparison prediction vs GT (maybe a PDF?).
-- [ ] Compute metric on whole images.
-- [ ] Implement train and val metric as unique Dice for all classes; for test: return Dice per class + Dice for all classes.
-- [ ] Write test dataset class.
-- [ ] Improve out losses weights are sent to GPU (internally, see loss classes).
-- [ ] If segmentation results are not good along the edges, implement a loss that penalizes when the model is approximative there.
-- [ ] Write custom architecture. Can add attention mechanisms too.
-- [ ] Consider whether to weight more the "other" class in the loss computation, since it encompasses a large variety of different kinds of objects.
+- Fix inference pipeline, so that it works like this and not using 'test_step' in the module:
+    - given a trained model.
+    - model is loaded from checkpoint.
+    - datamodule holds data split for train, val, test, and predict (fix datamodule constructs!)
+    - module has a method called "inference" that:
+        - gets a dataloader (either val, test, predict).
+        - does inference on patches.
+        - stitch patches and saves to disk whole photo predictions.
+        - saves to disk comparison plots (if not predict).
+        - computes whole photo metric, per class, and for all classes (if not predict).
+            - dice metric (overall for all classes and average for all images)
+            - dice metric per class (average for all images)
+            - top 5 predictions per class
+            - bottom 5 predictions per class
+- Improve how losses weights are sent to GPU (internally, see loss classes).
+- If segmentation results are not good along the edges, implement a loss that penalizes when the model is approximative there.
+- Write custom architecture. Can add attention mechanisms too.
+- Consider whether to weight more the "other" class in the loss computation, since it encompasses a large variety of different kinds of objects.
 
 

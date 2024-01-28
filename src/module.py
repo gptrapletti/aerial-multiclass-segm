@@ -3,7 +3,8 @@ import torch
 import numpy as np
 import cv2
 import os
-from src.processing_utils import mask_to_labels, color_code_pred_mask
+import matplotlib.pyplot as plt
+from src.processing_utils import mask_to_labels, color_code_pred_mask, color_code_gt_mask
 
 class AerialModule(pl.LightningModule):
     def __init__(self, backbone, loss_fn, metric, lr, output_path):
@@ -77,18 +78,49 @@ class AerialModule(pl.LightningModule):
             else:
                 # A patch from a new image arrived, so the previous image is complete and can be saved.
                 current_image_for_viz = color_code_pred_mask(self.current_image)
+                self.save_comparison_plot(filename=self.current_image_filename, current_image=current_image_for_viz)
                 current_image_for_viz = cv2.cvtColor(current_image_for_viz, cv2.COLOR_RGB2BGR)
                 predicted_masks_output_dirpath = os.path.join(self.output_path, 'inference', 'predicted_masks')
                 if not os.path.exists(predicted_masks_output_dirpath):
                     os.makedirs(predicted_masks_output_dirpath)
                 output_filepath = os.path.join(predicted_masks_output_dirpath, self.current_image_filename + '.jpg')
-                cv2.imwrite(filename=output_filepath, img=current_image_for_viz)     
+                cv2.imwrite(filename=output_filepath, img=current_image_for_viz)                     
                 # Init new current image
                 self.current_image_filename = image_filename
                 self.current_image = np.zeros(shape=(2000, 3000, 6))
                 # Add the new patch
                 self.current_image[bbox[0][0]:bbox[1][0], bbox[0][1]:bbox[1][1], :] = pred_patch
+                
+    def save_comparison_plot(self, filename, current_image):
+        image_path = os.path.join(f"{os.environ['HOME']}/ds/aerial-multiclass-segm/data/images", filename + '.jpg')
+        gt_mask_path = os.path.join(f"{os.environ['HOME']}/ds/aerial-multiclass-segm/data/masks", filename + '.png')
+
+        image = cv2.imread(image_path)
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        gt_mask = cv2.imread(gt_mask_path)[..., 0]
+        gt_mask = color_code_gt_mask(gt_mask)
         
+        fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(8, 16))
+
+        axes[0].imshow(image)
+        axes[0].set_title(f"image {filename}", fontsize=22)
+        axes[0].axis('off')
+
+        axes[1].imshow(gt_mask)
+        axes[1].set_title("GT mask", fontsize=22)
+        axes[1].axis('off')
+
+        axes[2].imshow(current_image)
+        axes[2].set_title("PRED mask", fontsize=22)
+        axes[2].axis('off')
+
+        plt.tight_layout()
+        output_dirpath = os.path.join(self.output_path, 'inference', 'comparison_plots')
+        if not os.path.exists(output_dirpath):
+            os.makedirs(output_dirpath)
+        plt.savefig(os.path.join(output_dirpath, filename + '.jpg'))
+        plt.close()     
+                
     def on_train_epoch_start(self): # NOTE: why did I add this? Maybe for the AerialSampler?
         return super().on_train_epoch_start()
         
